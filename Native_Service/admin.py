@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import NativePost
 
-# Register your models here.
+admin.register(admin)
+admin.site.register(NativePost)
