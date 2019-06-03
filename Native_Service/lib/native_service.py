@@ -1,35 +1,44 @@
 import os
-import sys
+os.environ['DJANGO_SETTINGS_MODULE'] = 'Native_Service.settings_module'
+
+from django.conf import settings
+from django.core.files import File
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 
 
 class NativeFile:
-    """ Creates an object assigned to file."""
+    """ NativeFile.file represents django file object. """
 
-    def __init__(self, patch, type, name, file_extension, size):
-        self.patch = patch
-        self.type = type
-        self.name = name
-        self.file_extension = file_extension
-        self.size = size
+    def __init__(self, path):
+        """ Path (string) from MEDIA_ROOT to file or just file name."""
+        self.path = path
+        self.file = self.file_object_creates()
 
-    def _patch(self):
-        # hmm
-        patch = self.patch
-        os.getcwd()
-        start_point = 0
-        file = os.open('../LICENSE', os.O_RDWR| os.O_CREAT)
-        return os.read(file, 12)
+    def open_file_from_dir(self):
+        """ Opens file from direction. """
+        return open(settings.MEDIA_ROOT + self.path, 'rb')
 
 
-    def _save(self):
-        pass
-
-    def _open(self):
-        pass
-
-    def _get_url(self):
-        pass
+    def file_object_creates(self):
+        """ Creates File instance. """
+        return File(self.open_file_from_dir())
 
 
-file = NativeFile(1,2,3,4,5)
-print(file._patch())
+
+
+"""
+
+obj_file = NativeFile('test_root.txt')
+
+# obj content \/
+print(obj_file.file.read())
+#path = default_storage.save('path/to/nowy_file.txt', ContentFile(obj_file.file.read()))
+
+
+image_obj = NativeFile('piesek.jpg')
+# image content\/
+print(image_obj.file.read())
+#image = default_storage.save('path/to/piesek.jpg', ContentFile(image_obj.file.read()))
+
+"""
