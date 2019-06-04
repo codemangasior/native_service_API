@@ -2,6 +2,8 @@ from django.db import models
 
 
 class NativePost(models.Model):
+    name = models.CharField(max_length=20)
+    last_name = models.CharField(max_length=40)
     title = models.CharField(max_length=120)
     email = models.CharField(max_length=100)
     phone = models.CharField(max_length=12)

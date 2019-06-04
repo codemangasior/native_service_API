@@ -73,20 +73,22 @@
 			<div class="container">
 				<form method="POST" enctype="multipart/form-data">
 					{% csrf_token %}
-					{{ form }}
-					<div class="row">
-						<input type="submit" value="Wyślij do wyceny">
-					</div>
+					{{ form.as_table }}
+						<p>
+							Wysyłając formularz wyrażasz zgodę na przetwarzanie Twoich danych osobowych na potrzeby realizacji
+							przedmiotowego zlecenia, zgodnie z art. 6 ust. 1 lit. a Rozporządzenia Parlamentu Europejskiego i Rady
+							(UE) 2016/679 z dnia 27 kwietnia 2016 r. w sprawie ochrony osób fizycznych w związku z przetwarzaniem danych
+							osobowych i w sprawie swobodnego przepływu takich danych oraz uchylenia dyrektywy 95/46/WE
+							(ogólne rozporządzenie o ochronie danych)
+						</p>
+						<div class="row">
+							<input type="submit" value="Wyślij do wyceny">
+						</div>
 				</form>
-			<p>
-				Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-				Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-			</p>
 		</div>
-		<div class="stepbystep">
+		<div class="step info">
 			<p>
-				Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-				Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+				Wycenę zlecenia otrzymasz już w ciągu <strong>15 minut</strong>! Po akceptacji warunków zlecenia będziesz na bieżąco informowany o statusie Twojego zlecenia przy pomocy wiadomości email. Zaraz po zakończeniu realizacji otrzymasz dokument prosto na swoją pocztę email.
 			</p>
 		</div>
 	</div>
