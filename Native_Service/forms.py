@@ -4,6 +4,20 @@ import datetime
 from django.conf import settings
 from django.core.mail import send_mail
 
+MONTHS = {
+    1: ("styczeń"),
+    2: ("luty"),
+    3: ("marzec"),
+    4: ("kwiecień"),
+    5: ("maj"),
+    6: ("czerwiec"),
+    7: ("lipiec"),
+    8: ("sierpień"),
+    9: ("wrzesień"),
+    10: ("październik"),
+    11: ("listopad"),
+    12: ("grudzień"),
+}
 
 
 class NativePostForm(forms.ModelForm):
@@ -13,28 +27,14 @@ class NativePostForm(forms.ModelForm):
     title = forms.CharField(label="Nazwa zlecenia", max_length=120)
     email = forms.CharField(label="Email", max_length=100)
     phone = forms.CharField(label="Nr telefonu", max_length=12)
-    date_to_be_done = forms.DateTimeField(
-        label="Data realizacji zlecenia:", initial=datetime.date.today, widget=""
+    date_to_be_done = forms.DateField(
+        widget=forms.SelectDateWidget(months=MONTHS),
+        label="Data najpóźniejszej realizacji",
     )
-    description = forms.CharField(label="Opis zlecenia", max_length=500)
+    description = forms.CharField(
+        label="Opis zlecenia", max_length=500, widget=forms.Textarea
+    )
     file = forms.FileField(label="Plik", initial="Wybierz plik do zlecenia")
-
-    def alert_send_email(self):
-        send_mail(
-            f"Nowe zlecenie!",
-            f"Wejdź na https://nativeservice.pl/admin/ i sprawdź co na Ciebie czeka.\n"
-            f"Imię: {self.cleaned_data['name']}\n"
-            f"Nazwisko: {self.cleaned_data['last_name']}\n"
-            f"Nazwa zlecenia: {self.cleaned_data['title']}\n"
-            f"Email: {self.cleaned_data['email']}\n"
-            f"Telefon: {self.cleaned_data['phone']}\n"
-            f"Data napóźniejszej realizacji {self.cleaned_data['date_to_be_done']}\n"
-            f"Opis: {self.cleaned_data['description']}\n"
-            f"Plik: https://api.nativeservice.pl{settings.MEDIA_URL}{self.cleaned_data['file']}",
-            "tlumaczenia@nativeservice.pl",
-            ["lukasz.gasiorowski92@gmail.com"],
-            fail_silently=False,
-        )
 
     class Meta:
         model = NativePost
