@@ -6,6 +6,6 @@ from django.conf import settings
 
 app_name = "Native_Service"
 urlpatterns = [
-    path("", views.get, name="index"),
-    path("upload", views.RecordView.as_view(), name="upload"),
+    path("", views.Pricing.as_view(), name="index"),
+    path("upload", views.FormSubmit.as_view(), name="upload"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
