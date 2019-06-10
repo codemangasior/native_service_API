@@ -1,5 +1,4 @@
 from django.db import models
-from django.urls import reverse
 
 
 class NativePost(models.Model):
@@ -12,6 +11,7 @@ class NativePost(models.Model):
     date_to_be_done = models.DateTimeField()
     description = models.CharField(max_length=500)
     file = models.FileField(upload_to="uploads/%Y/%m/%d/", null=True, blank=True)
+    secret_key = models.CharField(max_length=12)
 
     def __str__(self):
         return self.title

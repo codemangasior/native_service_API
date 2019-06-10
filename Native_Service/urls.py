@@ -8,4 +8,7 @@ app_name = "Native_Service"
 urlpatterns = [
     path("", views.Pricing.as_view(), name="index"),
     path("upload", views.FormSubmit.as_view(), name="upload"),
+    path(
+        "confrimation/<int:pk>", views.EmailComfirmation.as_view(), name="confirmation"
+    ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

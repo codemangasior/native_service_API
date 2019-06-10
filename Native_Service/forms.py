@@ -1,8 +1,6 @@
 from django import forms
 from .models import NativePost
-import datetime
-from django.conf import settings
-from django.core.mail import send_mail
+
 
 MONTHS = {
     1: ("styczeń"),
@@ -25,7 +23,7 @@ class NativePostForm(forms.ModelForm):
     name = forms.CharField(label="Imię", max_length=20)
     last_name = forms.CharField(label="Nazwisko", max_length=40)
     title = forms.CharField(label="Nazwa zlecenia", max_length=120)
-    email = forms.CharField(label="Email", max_length=100)
+    email = forms.CharField(label="Email", max_length=100, widget=forms.EmailInput())
     phone = forms.CharField(label="Nr telefonu", max_length=12)
     date_to_be_done = forms.DateField(
         widget=forms.SelectDateWidget(months=MONTHS),
@@ -34,7 +32,10 @@ class NativePostForm(forms.ModelForm):
     description = forms.CharField(
         label="Opis zlecenia", max_length=500, widget=forms.Textarea
     )
-    file = forms.FileField(label="Plik", initial="Wybierz plik do zlecenia")
+    file = forms.FileField(
+        label="Plik", widget=forms.ClearableFileInput(attrs={"multiple": True})
+    )
+    secret_key = forms.CharField(required=True, widget=forms.HiddenInput())
 
     class Meta:
         model = NativePost
@@ -47,4 +48,5 @@ class NativePostForm(forms.ModelForm):
             "date_to_be_done",
             "description",
             "file",
+            "secret_key",
         )
