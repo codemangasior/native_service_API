@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}NativeService API - Formularz wysłany{% endblock %}
+{% block content %}
+	<div class="second bar">
+			<h1>Zlecenie nr 010{{ id }}/2019 jest w trakcie wyceny!</h1>
+		<p>
+			Oto Twój klucz: <strong>{{ secret_key }}</strong>. Zapisz go w celu daleszej realizacji zlecenia.
+		</p>
+
+		<p>
+			{{ name }} skontaktujemy się z Tobą w celu ustalenia warunków realizacji zlecenia.
+		</p>
+	</div>
+	<div class="body seventy">
+	<!-- container -->
+		<div class="stepbystep upload">
+			<div class="container">
+					<h1>Nie wiesz jak przebiega realizacja?</h1>
+			<p>
+				Sprawdź klikając w przycisk poniżej
+			</p>
+				<a href="#"><button class="btn"><strong>Jak to działa?</strong></button></a>
+			</div>
+		</div>
+			<div class="stepbystep upload">
+			<p>
+				W razie problemów technicznych podczas wyceny, lub realizacji zamówienia skontaktuj się z naszym działem <strong>wsparcia technicznego</strong>.
+			</p>
+		</div>
+	</div>
+{% endblock %}

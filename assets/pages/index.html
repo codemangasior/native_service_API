@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}NativeService API - Wycena{% endblock %}
+{% block content %}
+
+
+<div class="second bar">
+		<h1>Wprowadź dokument, który chcesz przetłumaczyć:</h1>
+	<p>
+		Wypełnij formularz w celu szybszej realizacji zlecenia.
+	</p>
+</div>
+<div class="body seventy">
+<!-- container -->
+	<div class="stepbystep">
+		<div class="container">
+			<form method="POST" enctype="multipart/form-data">
+				{% csrf_token %}
+				{%  load widget_tweaks %}
+
+				{% for hidden_field in form.hidden_fields %}
+					{{ hidden_field }}
+				{% endfor %}
+
+				{% if form.non_field_errors %}
+					<div class="alert alert-danger" role="alert">
+						{% for error in form.non_field_errors %}
+							{{ error }}
+						{% endfor %}
+					</div>
+				{% endif %}
+
+				{% for field in form.visible_fields %}
+					<div class="form-group">
+						{{ field.label_tag }}<br>
+
+						{% if form.is_bound %}
+							{% if field.errors %}
+								{% render_field field class="form-control is-invalid" %}
+								{% for error in field.errors %}
+									<div class="invalid-feedback">
+										{{ error }}
+									</div>
+								{% endfor %}
+							{% else %}
+								{% render_field field class="form-control is-valid" %}
+							{% endif %}
+						{% else %}
+							{% render_field field class="form-control" %}
+						{% endif %}
+
+						{% if field.help_text %}
+							<small class="form-text text-muted">{{ field.help_text }}</small>
+						{% endif %}
+					</div>
+				{% endfor %}
+					<p>
+						Wysyłając formularz wyrażasz zgodę na przetwarzanie Twoich danych osobowych na potrzeby realizacji
+						przedmiotowego zlecenia, zgodnie z art. 6 ust. 1 lit. a Rozporządzenia Parlamentu Europejskiego i Rady
+						(UE) 2016/679 z dnia 27 kwietnia 2016 r. w sprawie ochrony osób fizycznych w związku z przetwarzaniem danych
+						osobowych i w sprawie swobodnego przepływu takich danych oraz uchylenia dyrektywy 95/46/WE
+						(ogólne rozporządzenie o ochronie danych)
+					</p>
+					<div class="row">
+						<input type="submit" value="Wyślij">
+					</div>
+			</form>
+	</div>
+	<div class="step info">
+		<p>
+			Wycenę zlecenia otrzymasz już w ciągu <strong>15 minut</strong>! Po akceptacji warunków zlecenia będziesz na bieżąco informowany o statusie Twojego zlecenia przy pomocy wiadomości email. Zaraz po zakończeniu realizacji otrzymasz dokument prosto na swoją pocztę email.
+		</p>
+	</div>
+</div>
+	</div>
+{% endblock %}

@@ -1,7 +1,5 @@
 from django.core.mail import send_mail
-from django.conf import settings
 import datetime
-import time
 
 
 HOST_URL = "https://api.nativeservice.pl"
