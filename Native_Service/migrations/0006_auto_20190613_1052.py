@@ -2,17 +2,15 @@
 
 from django.db import migrations, models
 
+# always remember to name your migrations
+
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('Native_Service', '0005_secret_key_added'),
-    ]
+    dependencies = [("Native_Service", "0005_secret_key_added")]
 
     operations = [
         migrations.AlterField(
-            model_name='nativepost',
-            name='date_to_be_done',
-            field=models.DateField(),
-        ),
+            model_name="nativepost", name="date_to_be_done", field=models.DateField()
+        )
     ]

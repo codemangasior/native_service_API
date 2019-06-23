@@ -1,25 +1,29 @@
 from django import forms
 from .models import NativePost
 
-
+# unnecessary parenthesis
 MONTHS = {
-    1: ("styczeń"),
-    2: ("luty"),
-    3: ("marzec"),
-    4: ("kwiecień"),
-    5: ("maj"),
-    6: ("czerwiec"),
-    7: ("lipiec"),
-    8: ("sierpień"),
-    9: ("wrzesień"),
-    10: ("październik"),
-    11: ("listopad"),
-    12: ("grudzień"),
+    1: "styczeń",
+    2: "luty",
+    3: "marzec",
+    4: "kwiecień",
+    5: "maj",
+    6: "czerwiec",
+    7: "lipiec",
+    8: "sierpień",
+    9: "wrzesień",
+    10: "październik",
+    11: "listopad",
+    12: "grudzień",
 }
 
 
 class NativePostForm(forms.ModelForm):
-
+    # The main ModelForm feature is that it discovers what fields the Model has and
+    # creates inputs for them *automatically*. You don't need to rewrite them all, it's
+    # enough to put them in the `Meta.fields` tuple.
+    # You write down only the field that you want to override with other than the django
+    # default widget, like this `multiple` in file OR when you want to add aditional fields.
     name = forms.CharField(label="Imię", max_length=20)
     last_name = forms.CharField(label="Nazwisko", max_length=40)
     title = forms.CharField(label="Nazwa zlecenia", max_length=120)

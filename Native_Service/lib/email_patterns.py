@@ -1,19 +1,22 @@
 from django.core.mail import send_mail
 import datetime
 
-
+# the vars below must be move to django settings, which BTW i don't see in this project :P
+# then you just do:
+# from django.conf import settings
+# settings.HOST_URL
 HOST_URL = "https://api.nativeservice.pl"
 SENDER = "nativeservice@nativeservice.pl"
 
 
 def file_list_creating(file_data):
-    files_list = []
-    [files_list.append(f"{HOST_URL}/{f}\n") for f in file_data]
-    return files_list
+    return [f"{HOST_URL}/{f}\n" for f in file_data]
 
 
 def performer_queue_alert_email(data, files="No files."):
-    recipients_list = ["lukasz.gasiorowski92@gmail.com"]
+    recipients_list = [
+        "lukasz.gasiorowski92@gmail.com"
+    ]  # the same, must be moved to settings
 
     send_mail(
         f"Nowe zlecenie!",
@@ -26,10 +29,10 @@ def performer_queue_alert_email(data, files="No files."):
         f"Data najpóźniejszej realizacji: {data['date_to_be_done']}\n"
         f"Opis: {data['description']}\n"
         f"{''.join(file_list_creating(files))}"
-        f"\n\nTen email został'wygenerowany automatycznie. Prosimy o nie odpowiadanie na wiadomość.",
+        f"\n\nTen email został wygenerowany automatycznie. Prosimy o nie odpowiadanie na wiadomość.",
         SENDER,
         recipients_list,
-        fail_silently=False,
+        fail_silently=False,  # are you sure? You wouldn't know it isn't working and your customers are ignored as I don't see any logging.
     )
 
 
