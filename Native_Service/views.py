@@ -202,7 +202,7 @@ class PriceForCustomer(TemplateView):
 class PriceAcceptedDotpay(TemplateView):
     template_name = "price_accepted.html"
     """ View for a customer to use Dotpay. """
-
+    #todo email alert for performer about waiting for payment
     def get(self, request, *args, **kwargs):
         if self.request.session.test_cookie_worked():
             # Gets secret_key from session

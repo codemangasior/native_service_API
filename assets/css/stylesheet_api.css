@@ -310,6 +310,7 @@ ul li a {
 	color: black;
 	max-width: 80%;
 	font-family: 'Mukta', sans-serif;
+	text-align: center;
 
 }
 .column.bar1 {
@@ -357,6 +358,12 @@ ul li a {
 	font-size: 40px;
 	margin: 0;
 }
+
+.info.mobile{
+	display: none;
+}
+
+
 /* stepbystep */
 .stepbystep{
 	width: auto;
@@ -562,37 +569,48 @@ header::before{
 
 	.body.seventy{
 		width: 95%;
-	}
+		}
 	.second.bar{
-	width: auto;
-	min-height: auto;
-	background-image: linear-gradient(to bottom, hsl(348, 100%, 61%), hsl(198, 1%, 88%));
-	font-family: 'Oswald', sans-serif;
-	font-size: 20px;
-	padding-top: 20px;
-	padding-left: 20px;
-	color: black;
-	text-align: center;
-	}
+		width: auto;
+		min-height: auto;
+		background-image: linear-gradient(to bottom, hsl(348, 100%, 61%), hsl(198, 1%, 88%));
+		font-family: 'Oswald', sans-serif;
+		font-size: 20px;
+		padding-top: 20px;
+		padding-left: 20px;
+		color: black;
+		text-align: center;
+		}
 	.box.price{
-	display: block;
-	border: 2px solid #cccccc;
-	border-radius: 15px;
-	padding: 10px;
-	width: 92%;
-	word-wrap: break-word;
-	}
+		display: block;
+		border: 2px solid #cccccc;
+		border-radius: 15px;
+		padding: 10px;
+		width: 92%;
+		word-wrap: break-word;
+		}
 	.bar.mobile{
-	width: auto;
-	min-height: auto;
-	background-image: linear-gradient(to bottom, hsla(198, 1%, 88%, 0.95), hsla(198, 1%, 88%, 0.90));
-	font-family: 'Oswald', sans-serif;
-	font-size: 20px;
-	padding-top: 20px;
-	padding-left: 20px;
-	color: black;
-	text-align: center;
-}
+		width: auto;
+		min-height: auto;
+		background-image: linear-gradient(to bottom, hsla(198, 1%, 88%, 0.95), hsla(198, 1%, 88%, 0.90));
+		font-family: 'Oswald', sans-serif;
+		font-size: 20px;
+		padding-top: 20px;
+		padding-left: 20px;
+		color: black;
+		text-align: center;
+		}
+	.info.mobile{
+		display: block;
+		width: auto;
+		min-height: auto;
+		background-image: linear-gradient(to bottom right, hsl(348, 100%, 61%), hsl(348, 100%, 61%));
+		font-family: 'Oswald', sans-serif;
+		font-size: 20px;
+		color: black;
+		text-align: center;
+		margin-bottom: 20px;
+		}
 
 }
 
