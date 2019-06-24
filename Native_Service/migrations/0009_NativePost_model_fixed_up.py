@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ),
                 ("time_to_get_ready", models.DateField()),
                 ("price", models.CharField(max_length=10)),
-                ("comments", models.CharField(max_length=500)),
+                ("comments", models.CharField(max_length=1000)),
             ],
         ),
         migrations.AlterField(

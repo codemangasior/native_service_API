@@ -12,7 +12,7 @@ from Native_Service.lib.native_service import UrlsGenerator
 from Native_Service.lib.native_service import SecretKeyGenerator
 import datetime
 
-#todo Views need to return 404 errors while any bugs appear
+# todo Views need to return 404 errors while any bugs appear
 
 """
 def dispatch(self, request, *args, **kwargs):
@@ -70,9 +70,7 @@ class Pricing(FormView):
         if form.is_valid():
             path = settings.MEDIA_ROOT + f"uploads/{datetime.date.today()}/"
             for f in self.files:
-                fs = FileSystemStorage(
-                    location=path
-                )
+                fs = FileSystemStorage(location=path)
                 fs.save(f"{f}".replace(" ", "_"), ContentFile(f.read()))
 
             return self.form_valid(form)
@@ -95,7 +93,8 @@ class Pricing(FormView):
         self.request.session.set_test_cookie()
         return super().form_valid(form)
 
-#todo need to test, IMO should be FormView also.
+
+# todo need to test, IMO should be FormView also.
 class SubmitPricing(Pricing):
     """ Correct form view for CUSTOMER protected by session. """
 
@@ -133,7 +132,9 @@ class FinalPricing(FormView):
         self.request.session["secret_key"] = secret_key
 
         self.initial = {"secret_key": secret_key}
-        return self.render_to_response(self.get_context_data())
+        # Render only if secret key exists in db
+        if secret_key == _get_data_from_models(secret_key)["secret_key"]:
+            return self.render_to_response(self.get_context_data())
 
     def form_valid(self, form):
         """ Form validation with an email alert for NativeService. """
@@ -204,8 +205,16 @@ class PriceAcceptedDotpay(TemplateView):
 
     def get(self, request, *args, **kwargs):
         if self.request.session.test_cookie_worked():
+            # Gets secret_key from session
+            secret_key = self.request.session["secret_key"]
             # Function gets all data from all models with secret_key
-            data_dict = _get_data_from_models(self.request.session["secret_key"])
+            data_dict = _get_data_from_models(secret_key)
 
-            self.request.session.delete_test_cookie()
-            return self.render_to_response(data_dict)
+            # Gets 'secret_key' from url
+            path = self.request.path
+            url_secret_key = path.rsplit("/")[-2]
+
+            # Secret_key authorization
+            if secret_key == url_secret_key:
+                self.request.session.delete_test_cookie()
+                return self.render_to_response(data_dict)

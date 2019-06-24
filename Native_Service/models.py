@@ -4,16 +4,33 @@ from django.db import models
 
 
 class NativePost(models.Model):
+
+    PRIORITY_CHOICE = [
+        ("WYSOKI", "WYSOKI"),
+        ("STANDARD", "STANDARD"),
+        ("NISKI", "NISKI"),
+    ]
+    CATEGORY_CHOICE = [
+        ("REPREZENTOWANIE FIRM", "REPREZENTOWANIE FIRM"),
+        ("SPRAWY URZĘDOWE", "SPRAWY URZĘDOWE"),
+        ("PRACA MIESZKANIE AUTO", "PRACA MIESZKANIE AUTO"),
+        ("TŁUMACZENIA", "TŁUMACZENIA"),
+    ]
+
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICE)
     name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=40)
     title = models.CharField(max_length=120)
+    priority = models.CharField(
+        max_length=15, choices=PRIORITY_CHOICE, default="STANDARD"
+    )
     email = models.CharField(max_length=100)
     phone = models.CharField(max_length=12)
     date_time = models.DateTimeField(auto_now_add=True)
     date_to_be_done = models.DateField()
-    description = models.CharField(max_length=500)
+    description = models.CharField(max_length=1000)
     # todo model shows only one file when more of them are uploaded
-    file = models.FileField(upload_to="uploads/%Y/%m/%d/", null=True, blank=True)
+    file = models.FileField(null=True, blank=True)
     secret_key = models.CharField(max_length=45)
 
     def __str__(self):

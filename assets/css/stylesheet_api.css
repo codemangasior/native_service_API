@@ -683,3 +683,16 @@ input[type=submit]:hover {
 	border-radius: 4px;
 }
 
+#id_priority {
+	width: 100%;
+	padding: 12px;
+	height: auto;
+	border-radius: 4px;
+}
+
+#id_category {
+	width: 100%;
+	padding: 12px;
+	height: auto;
+	border-radius: 4px;
+}
