@@ -6,7 +6,8 @@ from django.conf import settings
 
 app_name = "Native_Service"
 urlpatterns = [
-    path("", views.Pricing.as_view(), name="pricing"),
+    path("", views.IndexCategorySelect.as_view(), name="index"),
+    path("pricing", views.Pricing.as_view(), name="pricing"),
     path("upload", views.SubmitPricing.as_view(), name="submit_pricing"),
     path(
         "final_pricing/<str:secret_key>/",

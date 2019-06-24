@@ -178,6 +178,7 @@ ul li a {
 .box.card:hover  .content.card h2
 {
 	top: -140px;
+	color: hsla(348, 100%, 61%, 0.5);
 }
 .box.card:hover  .content.card h3
 {
@@ -580,7 +581,19 @@ header::before{
 	padding: 10px;
 	width: 92%;
 	word-wrap: break-word;
+	}
+	.bar.mobile{
+	width: auto;
+	min-height: auto;
+	background-image: linear-gradient(to bottom, hsla(198, 1%, 88%, 0.95), hsla(198, 1%, 88%, 0.90));
+	font-family: 'Oswald', sans-serif;
+	font-size: 20px;
+	padding-top: 20px;
+	padding-left: 20px;
+	color: black;
+	text-align: center;
 }
+
 }
 
 
@@ -669,3 +682,4 @@ input[type=submit]:hover {
 	height: auto;
 	border-radius: 4px;
 }
+

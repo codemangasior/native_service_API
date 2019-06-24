@@ -10,9 +10,9 @@ from .forms import FinalPricingForm
 from Native_Service.lib.native_service import ProgressStages
 from Native_Service.lib.native_service import UrlsGenerator
 from Native_Service.lib.native_service import SecretKeyGenerator
-
-
 import datetime
+
+#todo Views need to return 404 errors while any bugs appear
 
 """
 def dispatch(self, request, *args, **kwargs):
@@ -22,7 +22,7 @@ def dispatch(self, request, *args, **kwargs):
 """
 
 
-def get_data_from_models(secret_key):
+def _get_data_from_models(secret_key):
     """ Function returns all data filtered with secret_key as a dict."""
     data = NativePost.objects.filter(secret_key=secret_key)
     data2 = FinalPricingModel.objects.filter(secret_key=secret_key)
@@ -35,13 +35,17 @@ def get_data_from_models(secret_key):
     return data_dict
 
 
+class IndexCategorySelect(TemplateView):
+    template_name = "index.html"
+
+
 class Pricing(FormView):
     """ Pricing view for not logged in users. """
 
     template_name = "pricing.html"
-    secret_key = None
-    form_class = NativePostForm
     success_url = "/upload"
+    form_class = NativePostForm
+    secret_key = None
     files = None
 
     def get(self, request, *args, **kwargs):
@@ -64,9 +68,10 @@ class Pricing(FormView):
         self.files = request.FILES.getlist("file")
 
         if form.is_valid():
+            path = settings.MEDIA_ROOT + f"uploads/{datetime.date.today()}/"
             for f in self.files:
                 fs = FileSystemStorage(
-                    location=settings.MEDIA_ROOT + f"uploads/{datetime.date.today()}/"
+                    location=path
                 )
                 fs.save(f"{f}".replace(" ", "_"), ContentFile(f.read()))
 
@@ -90,7 +95,7 @@ class Pricing(FormView):
         self.request.session.set_test_cookie()
         return super().form_valid(form)
 
-
+#todo need to test, IMO should be FormView also.
 class SubmitPricing(Pricing):
     """ Correct form view for CUSTOMER protected by session. """
 
@@ -106,7 +111,7 @@ class SubmitPricing(Pricing):
 
         if self.request.session.test_cookie_worked():
             # Function gets all data from all models with secret_key
-            data_dict = get_data_from_models(self.secret_key)
+            data_dict = _get_data_from_models(self.secret_key)
 
             self.request.session.delete_test_cookie()
             return render(self.request, template_name, data_dict)
@@ -139,7 +144,7 @@ class FinalPricing(FormView):
         secret_key = self.request.session["secret_key"]
 
         # Function gets all data from all models with secret_key
-        data_dict = get_data_from_models(secret_key)
+        data_dict = _get_data_from_models(secret_key)
 
         # Creates url for customer to see price
         email_url = UrlsGenerator().accept_view_url_generator(secret_key)
@@ -147,7 +152,7 @@ class FinalPricing(FormView):
         # Creates url which gives possibility to accept price by customer
         price_accept_url = UrlsGenerator().accept_price_url_generator(secret_key)
 
-        # Setting stage in Progress Stages library
+        # Setting stage in Progress Stages library      #todo \/ redundant now IMO
         ProgressStages(
             data=data_dict, url=email_url, url_accept_price=price_accept_url
         ).pricing_in_progress_stage()
@@ -184,7 +189,7 @@ class PriceForCustomer(TemplateView):
         self.request.session["secret_key"] = secret_key
 
         # Function gets all data from all models with secret_key
-        data_dict = get_data_from_models(secret_key)
+        data_dict = _get_data_from_models(secret_key)
 
         # Creates url which gives possibility to accept price by customer
         price_accept_url = UrlsGenerator().accept_price_url_generator(secret_key)
@@ -200,7 +205,7 @@ class PriceAcceptedDotpay(TemplateView):
     def get(self, request, *args, **kwargs):
         if self.request.session.test_cookie_worked():
             # Function gets all data from all models with secret_key
-            data_dict = get_data_from_models(self.request.session["secret_key"])
+            data_dict = _get_data_from_models(self.request.session["secret_key"])
 
             self.request.session.delete_test_cookie()
             return self.render_to_response(data_dict)

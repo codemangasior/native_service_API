@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}NativeService API - Kategorie{% endblock %}
+{% block content %}
+
+
+<div class="second bar">
+		<h1>Wybierz jedną spośród czterech kategorii:</h1>
+	<p>
+		Wybór odpowiedniej kategorii znacząco przyspiesza realizację zlecenia.
+	</p>
+</div>
+<div class="body seventy">
+<!-- container -->
+		<div class="container card">
+		<div class="box card">
+			<div class="content card">
+				<h2><i class="fas fa-user-tie"></i></h2>
+				<h3>Reprezentowanie firm</h3>
+				<p>
+					- rozmowy telefoniczne,<br>
+					- korespondencja zagraniczna, <br>
+					- negocjacje,<br>
+					- sporządzanie tekstów.<br>
+				</p>
+				<a href="{% url "Native_Service:pricing" %}">Wycena</a>
+			</div>
+		</div>
+		<div class="box card">
+			<div class="content card">
+				<h2><i class="fas fa-mail-bulk"></i></h2>
+				<h3>Sprawy urzędowe</h3>
+				<p>
+					- świadczenia <strong>KINDERGELD</strong>,<br>
+					- mandaty,<br>
+					- obywatelstwo niemieckie,<br>
+					- pobyt na terenie niemiec,<br>
+					- wszelkie wnioski i podania.<br>
+				</p>
+				<a href="{% url "Native_Service:pricing" %}">Wycena</a>
+			</div>
+		</div>
+		<div class="box card">
+			<div class="content card">
+				<h2><i class="fas fa-home"></i></h2>
+				<h3>Praca, mieszkanie, auto</h3>
+				<p>
+					- pomoc przy szukaniu zatrudnienia,<br>
+					- pomoc przy szukaniu mieszkania,<br>
+					- pomoc w kontaktach przy poszukiwaniu pojazdów na terenie niemiec.<br>
+				</p>
+				<a href="{% url "Native_Service:pricing" %}">Wycena</a>
+			</div>
+		</div>
+		<div class="box card">
+			<div class="content card">
+				<h2><i class="fas fa-language"></i></h2>
+				<h3>Tłumaczenia</h3>
+				<p>
+					- tłumaczenie tekstów,<br>
+					- pisanie tekstów,<br>
+					- weryfikacja/korekta tekstów,<br>
+					- przekładanie z słuchu,<br>
+				</p>
+				<a href="{% url "Native_Service:pricing" %}">Wycena</a>
+			</div>
+		</div>
+	</div>
+
+		</div>
+		<div class="step info">
+
+		</div>
+	</div>
+</div>
+{% endblock %}
