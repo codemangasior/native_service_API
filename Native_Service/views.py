@@ -16,7 +16,6 @@ import datetime
 
 """
 def dispatch(self, request, *args, **kwargs):
-    import pdb
     breakpoint()
     return super().dispatch(request, *args, **kwargs)
 """
@@ -43,7 +42,7 @@ class Pricing(FormView):
     """ Pricing view for not logged in users. """
 
     template_name = "pricing.html"
-    success_url = "/upload"
+    success_url = "/pricing_submit"
     form_class = NativePostForm
     secret_key = None
     files = None
@@ -60,16 +59,17 @@ class Pricing(FormView):
         return self.render_to_response(self.get_context_data())
 
     def post(self, request, *args, **kwargs):
-        """ Method posts form and saves the files in storage"""
+        """Method posts form and saves the files in storage """
         form_class = self.get_form_class()
         form = self.get_form(form_class)
 
         # Makes list of files
         self.files = request.FILES.getlist("file")
-
+        
         if form.is_valid():
             path = settings.MEDIA_ROOT + f"uploads/{datetime.date.today()}/"
             for f in self.files:
+
                 fs = FileSystemStorage(location=path)
                 fs.save(f"{f}".replace(" ", "_"), ContentFile(f.read()))
 
@@ -83,7 +83,9 @@ class Pricing(FormView):
         # Gets secret_key from session
         secret_key = self.request.session["secret_key"]
         post = form.save(commit=False)
+        #print(self.request.FILES.path)
         post.save()
+
 
         # Creates custom url for performer
         url = UrlsGenerator().final_pricing_url_genrator(secret_key)

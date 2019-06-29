@@ -3,13 +3,7 @@ import random
 import string
 from django.conf import settings
 from django.core.mail import send_mail
-
 os.environ["DJANGO_SETTINGS_MODULE"] = "Native_Service.settings_module"
-
-LOCAL_HOST_URL = "http://127.0.0.1:8000"
-HOST_URL = "https://api.nativeservice.pl"
-SENDER = "nativeservice@nativeservice.pl"
-PERFORMERS_LIST = ["lukasz.gasiorowski92@gmail.com"]
 
 
 class ProgressStages:
@@ -26,6 +20,7 @@ class ProgressStages:
 
     def in_queue_stage(self):
         self.current_stage = self.STAGES[0]
+        #todo emails needs new files urls
         EmailGenerator().performer_queue_alert_email(self.data, self.files, self.url)
         EmailGenerator().customer_queue_alert_email(self.data, self.files)
 
@@ -59,31 +54,26 @@ class UrlsGenerator:
 
     def files_urls_list_creating(self, file_data):
         """ Method generates uploaded file list. """
-        files_list = []
-        [
-            files_list.append(f"{HOST_URL}{settings.MEDIA_URL}{f}\n".replace(" ", "_"))
-            for f in file_data
-        ]
-        return files_list
+        return [f"{settings.HOST_URL}{settings.MEDIA_URL}{f}\n".replace(" ", "_") for f in file_data]
 
     def final_pricing_url_genrator(self, secret_key):
         """ Method generates url for performer to make some price. """
-        return f"{LOCAL_HOST_URL}/final_pricing/{secret_key}/"
+        return f"{settings.LOCAL_HOST_URL}/final_pricing/{secret_key}/"
 
     def accept_view_url_generator(self, secret_key):
         """ Method generates url for customer to see price. """
-        return f"{LOCAL_HOST_URL}/price_for_you/{secret_key}/"
+        return f"{settings.LOCAL_HOST_URL}/price_for_you/{secret_key}/"
 
     def accept_price_url_generator(self, secret_key):
         """ Method generates url for customer for price accept. """
-        return f"{LOCAL_HOST_URL}/price_accepted/{secret_key}/"
+        return f"{settings.LOCAL_HOST_URL}/price_accepted/{secret_key}/"
 
 
 class EmailGenerator:
     """ The class contains all email sending methods. """
 
     def performer_queue_alert_email(self, data, files="No files.", url="No url."):
-        recipients_list = PERFORMERS_LIST
+        recipients_list = settings.PERFORMERS_LIST
 
         send_mail(
             f"Nowe zlecenie!",
@@ -98,7 +88,7 @@ class EmailGenerator:
             f"{''.join(UrlsGenerator().files_urls_list_creating(files))}"
             f"\n\nTen email został'wygenerowany automatycznie. Prosimy o nie odpowiadanie na wiadomość.\n"
             f"Wejdź na {url} i dokonaj wyceny.",
-            SENDER,
+            settings.SENDER,
             recipients_list,
             fail_silently=False,
         )
@@ -122,7 +112,7 @@ class EmailGenerator:
             f"Opis: {data['description']}\n"
             f"{''.join(UrlsGenerator().files_urls_list_creating(files))}"
             f"\n\nTen email został'wygenerowany automatycznie. Prosimy o nie odpowiadanie na wiadomość.",
-            SENDER,
+            settings.SENDER,
             recipients_list,
             fail_silently=False,
         )
@@ -139,7 +129,7 @@ class EmailGenerator:
             f"Uwagi: {data['comments']}.\n"
             f"Aby zapoznać się ze szczegółami kliknij w link: {url}\n"
             f"\n\nTen email został'wygenerowany automatycznie. Prosimy o nie odpowiadanie na wiadomość.",
-            SENDER,
+            settings.SENDER,
             recipients_list,
             fail_silently=False,
         )
