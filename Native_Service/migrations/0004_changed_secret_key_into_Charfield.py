@@ -5,14 +5,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('Native_Service', '0003_comments_field_changed_on_textfield'),
-    ]
+    dependencies = [("Native_Service", "0003_comments_field_changed_on_textfield")]
 
     operations = [
         migrations.AlterField(
-            model_name='nativepost',
-            name='secret_key',
+            model_name="nativepost",
+            name="secret_key",
             field=models.CharField(max_length=45),
-        ),
+        )
     ]

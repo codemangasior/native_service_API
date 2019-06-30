@@ -6,6 +6,10 @@ from django.shortcuts import render
 from .models import NativePost
 from .forms import PricingForm
 from .forms import FinalPricingForm
+from .forms import BusinessForm
+from .forms import OfficialForm
+from .forms import JobHomeCarForm
+from .forms import TranslatingForm
 from Native_Service.lib.native_service import ProgressStages
 from Native_Service.lib.native_service import UrlsGenerator
 from Native_Service.lib.native_service import SecretKey
@@ -61,7 +65,7 @@ class Pricing(FormView):
 
         # Makes list of files
         self.files = request.FILES.getlist("file")
-        
+
         if form.is_valid():
             path = settings.MEDIA_ROOT + f"uploads/{datetime.date.today()}/"
             for f in self.files:
@@ -79,9 +83,8 @@ class Pricing(FormView):
         # Gets secret_key from session
         secret_key = self.request.session["secret_key"]
         post = form.save(commit=False)
-        #print(self.request.FILES.path)
+        # print(self.request.FILES.path)
         post.save()
-
 
         # Creates custom url for performer
         url = UrlsGenerator().final_pricing_url_genrator(secret_key)
@@ -90,6 +93,34 @@ class Pricing(FormView):
 
         self.request.session.set_test_cookie()
         return super().form_valid(form)
+
+
+class BusinessFormView(Pricing):
+    """ Business category view. """
+
+    template_name = "business_form.html"
+    form_class = BusinessForm
+
+
+class OfficialFormView(Pricing):
+    """ Official category view. """
+
+    template_name = "official_form.html"
+    form_class = OfficialForm
+
+
+class JobHomeCarFormView(Pricing):
+    """ Job Home Car category view. """
+
+    template_name = "jobhomecar_form.html"
+    form_class = JobHomeCarForm
+
+
+class TranslatingFormView(Pricing):
+    """ Translating category view. """
+
+    template_name = "translating_form.html"
+    form_class = TranslatingForm
 
 
 class SubmitPricing(Pricing):
@@ -117,8 +148,7 @@ class FinalPricing(UpdateView):
     """ UpdateView for performer to set a price for customer. """
 
     model = NativePost
-    #fields = ['price', 'comments', 'time_to_get_ready']
-    template_name_suffix = '_update_form'
+    template_name_suffix = "_update_form"
     success_url = "final-pricing-submit"
     form_class = FinalPricingForm
 
@@ -198,7 +228,7 @@ class PriceForCustomer(TemplateView):
 class PriceAcceptedDotpay(TemplateView):
     template_name = "price_accepted.html"
     """ View for a customer to use Dotpay. """
-    #todo email alert for performer about waiting for payment
+    # todo email alert for performer about waiting for payment
     def get(self, request, *args, **kwargs):
         if self.request.session.test_cookie_worked():
             # Gets secret_key from session

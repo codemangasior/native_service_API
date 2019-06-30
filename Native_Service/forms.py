@@ -17,6 +17,7 @@ MONTHS = {
     12: "grudzień",
 }
 
+
 class PricingForm(forms.ModelForm):
     """ Basic form for all categories. """
 
@@ -35,7 +36,6 @@ class PricingForm(forms.ModelForm):
     )
     secret_key = forms.CharField(required=True, widget=forms.HiddenInput())
     slug = forms.CharField(required=True, widget=forms.HiddenInput())
-
 
     class Meta:
         model = NativePost
@@ -56,45 +56,35 @@ class PricingForm(forms.ModelForm):
 
 
 class BusinessForm(PricingForm):
-    category = forms.CharField(max_length=50, initial="REPREZENTOWANIE FIRM", widget=forms.HiddenInput())
+    """ Basic form with the predefined category. """
 
-    class Meta:
-        model = NativePost
-        fields = (
-            "category",
-            "name",
-            "last_name",
-            "title",
-            "priority",
-            "email",
-            "phone",
-            "date_to_be_done",
-            "description",
-            "file",
-            "secret_key",
-            "slug",
-        )
-
-class OfficialForm(forms.ModelForm):
-    pass
-
-class JobHomeCarForm(forms.ModelForm):
-    pass
-
-class TranslatingForm(forms.ModelForm):
-    pass
+    category = forms.CharField(
+        max_length=50, initial="REPREZENTOWANIE FIRM", widget=forms.HiddenInput()
+    )
 
 
+class OfficialForm(PricingForm):
+    """ Basic form with the predefined category. """
+
+    category = forms.CharField(
+        max_length=50, initial="SPRAWY URZĘDOWE", widget=forms.HiddenInput()
+    )
 
 
+class JobHomeCarForm(PricingForm):
+    """ Basic form with the predefined category. """
+
+    category = forms.CharField(
+        max_length=50, initial="PRACA MIESZKANIE AUTO", widget=forms.HiddenInput()
+    )
 
 
+class TranslatingForm(PricingForm):
+    """ Basic form with the predefined category. """
 
-
-
-
-
-
+    category = forms.CharField(
+        max_length=50, initial="TŁUMACZENIA", widget=forms.HiddenInput()
+    )
 
 
 class FinalPricingForm(forms.ModelForm):

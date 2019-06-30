@@ -2,6 +2,7 @@ import os
 from django.conf import settings
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
+
 os.environ["DJANGO_SETTINGS_MODULE"] = "Native_Service.settings_module"
 
 
@@ -25,7 +26,7 @@ class ProgressStages:
 
     def in_queue_stage(self):
         self.current_stage = STAGES.IN_QUEUE
-        #todo emails needs new files urls
+        # todo emails needs new files urls
         EmailGenerator().performer_queue_alert_email(self.data, self.files, self.url)
         EmailGenerator().customer_queue_alert_email(self.data, self.files)
 
@@ -53,12 +54,16 @@ class SecretKey:
         """ Method generates secret keys. """
         return get_random_string(12)
 
+
 class UrlsGenerator:
     """ The class contains all methods generating URL's"""
 
     def files_urls_list_creating(self, file_data):
         """ Method generates uploaded file list. """
-        return [f"{settings.HOST_URL}{settings.MEDIA_URL}{f}\n".replace(" ", "_") for f in file_data]
+        return [
+            f"{settings.HOST_URL}{settings.MEDIA_URL}{f}\n".replace(" ", "_")
+            for f in file_data
+        ]
 
     def final_pricing_url_genrator(self, secret_key):
         """ Method generates url for performer to make some price. """
