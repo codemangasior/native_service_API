@@ -1,15 +1,20 @@
 import os
-import random
-import string
 from django.conf import settings
 from django.core.mail import send_mail
+from django.utils.crypto import get_random_string
 os.environ["DJANGO_SETTINGS_MODULE"] = "Native_Service.settings_module"
+
+
+class STAGES:
+    IN_QUEUE = "in_queue"
+    PRICING_IN_PROGRESS = "pricing_in_progress"
+    ACCEPTED = "accepted"
+    IN_PROGRESS = "in_progress"
+    DONE = "done"
 
 
 class ProgressStages:
     """ Basic logic of email alert system. """
-
-    STAGES = ("in_queue", "pricing_in_progress", "accepted", "in_progress", "done")
 
     def __init__(self, data=None, files=None, url=None, url_accept_price=None):
         self.current_stage = None
@@ -19,35 +24,34 @@ class ProgressStages:
         self.url_accept_price = url_accept_price
 
     def in_queue_stage(self):
-        self.current_stage = self.STAGES[0]
+        self.current_stage = STAGES.IN_QUEUE
         #todo emails needs new files urls
         EmailGenerator().performer_queue_alert_email(self.data, self.files, self.url)
         EmailGenerator().customer_queue_alert_email(self.data, self.files)
 
     def pricing_in_progress_stage(self):
-        self.current_stage = self.STAGES[1]
+        self.current_stage = STAGES.PRICING_IN_PROGRESS
         EmailGenerator().customer_price_accept_email(self.data, self.url)
 
     def accepted_stage(self):
-        self.current_stage = self.STAGES[2]
+        self.current_stage = STAGES.ACCEPTED
 
         pass
 
     def in_progress_stage(self):
-        self.current_stage = self.STAGES[3]
+        self.current_stage = STAGES.IN_PROGRESS
         pass
 
     def done_stage(self):
-        self.current_stage = self.STAGES[4]
+        self.current_stage = STAGES.DONE
         pass
 
 
-class SecretKeyGenerator:
-    def secret_key_generator(self):
+class SecretKey:
+    @staticmethod
+    def create():
         """ Method generates secret keys. """
-        letters, numbers = string.ascii_lowercase, string.digits
-        return "".join(random.choice(letters + numbers) for i in range(12))
-
+        return get_random_string(12)
 
 class UrlsGenerator:
     """ The class contains all methods generating URL's"""

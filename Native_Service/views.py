@@ -1,15 +1,14 @@
 from django.core.files.storage import FileSystemStorage
 from django.core.files.base import ContentFile
 from django.conf import settings
-from django.views.generic import FormView, TemplateView
+from django.views.generic import FormView, TemplateView, UpdateView
 from django.shortcuts import render
 from .models import NativePost
-from .models import FinalPricing as FinalPricingModel
-from .forms import NativePostForm
+from .forms import PricingForm
 from .forms import FinalPricingForm
 from Native_Service.lib.native_service import ProgressStages
 from Native_Service.lib.native_service import UrlsGenerator
-from Native_Service.lib.native_service import SecretKeyGenerator
+from Native_Service.lib.native_service import SecretKey
 import datetime
 
 # todo Views need to return 404 errors while any bugs appear
@@ -24,13 +23,10 @@ def dispatch(self, request, *args, **kwargs):
 def _get_data_from_models(secret_key):
     """ Function returns all data filtered with secret_key as a dict."""
     data = NativePost.objects.filter(secret_key=secret_key)
-    data2 = FinalPricingModel.objects.filter(secret_key=secret_key)
 
     data_dict = {}
     for i in data.values():
         data_dict.update(i)
-    for j in data2.values():
-        data_dict.update(j)
     return data_dict
 
 
@@ -43,19 +39,19 @@ class Pricing(FormView):
 
     template_name = "pricing.html"
     success_url = "/pricing_submit"
-    form_class = NativePostForm
+    form_class = PricingForm
     secret_key = None
     files = None
 
     def get(self, request, *args, **kwargs):
         """ Method generates secret_key in every request. """
-        secret_key = SecretKeyGenerator().secret_key_generator()
+        secret_key = SecretKey().create()
 
         # Passing secret_key by session to other methods
         self.request.session["secret_key"] = secret_key
 
         # Sets secret_key as default value in form.
-        self.initial = {"secret_key": secret_key}
+        self.initial = {"secret_key": secret_key, "slug": secret_key}
         return self.render_to_response(self.get_context_data())
 
     def post(self, request, *args, **kwargs):
@@ -96,7 +92,6 @@ class Pricing(FormView):
         return super().form_valid(form)
 
 
-# todo need to test, IMO should be FormView also.
 class SubmitPricing(Pricing):
     """ Correct form view for CUSTOMER protected by session. """
 
@@ -118,12 +113,14 @@ class SubmitPricing(Pricing):
             return render(self.request, template_name, data_dict)
 
 
-class FinalPricing(FormView):
-    """ View for performer to set a price for customer. """
+class FinalPricing(UpdateView):
+    """ UpdateView for performer to set a price for customer. """
 
-    template_name = "final_pricing.html"
+    model = NativePost
+    #fields = ['price', 'comments', 'time_to_get_ready']
+    template_name_suffix = '_update_form'
+    success_url = "final-pricing-submit"
     form_class = FinalPricingForm
-    success_url = "final_pricing_submit"
 
     def get(self, request, *args, **kwargs):
         # Gets 'secret_key' from url
@@ -133,35 +130,14 @@ class FinalPricing(FormView):
         # Passing secret_key by session to other methods
         self.request.session["secret_key"] = secret_key
 
-        self.initial = {"secret_key": secret_key}
         # Render only if secret key exists in db
         if secret_key == _get_data_from_models(secret_key)["secret_key"]:
-            return self.render_to_response(self.get_context_data())
+            return super().get(request, *args, **kwargs)
 
-    def form_valid(self, form):
-        """ Form validation with an email alert for NativeService. """
-        post = form.save(commit=False)
-        post.save()
-
-        # Gets secret_key from session
-        secret_key = self.request.session["secret_key"]
-
-        # Function gets all data from all models with secret_key
-        data_dict = _get_data_from_models(secret_key)
-
-        # Creates url for customer to see price
-        email_url = UrlsGenerator().accept_view_url_generator(secret_key)
-
-        # Creates url which gives possibility to accept price by customer
-        price_accept_url = UrlsGenerator().accept_price_url_generator(secret_key)
-
-        # Setting stage in Progress Stages library      #todo \/ redundant now IMO
-        ProgressStages(
-            data=data_dict, url=email_url, url_accept_price=price_accept_url
-        ).pricing_in_progress_stage()
+    def post(self, request, *args, **kwargs):
 
         self.request.session.set_test_cookie()
-        return super().form_valid(form)
+        return super().post(request, *args, **kwargs)
 
 
 class FinalPricingSubmit(TemplateView):
@@ -171,6 +147,24 @@ class FinalPricingSubmit(TemplateView):
 
     def get(self, request, *args, **kwargs):
         if self.request.session.test_cookie_worked:
+
+            # Gets secret_key from session
+            secret_key = self.request.session["secret_key"]
+
+            # Function gets all data from all models with secret_key
+            data_dict = _get_data_from_models(secret_key)
+
+            # Creates url for customer to see price
+            email_url = UrlsGenerator().accept_view_url_generator(secret_key)
+
+            # Creates url which gives possibility to accept price by customer
+            price_accept_url = UrlsGenerator().accept_price_url_generator(secret_key)
+
+            # Setting stage in Progress Stages library      #todo \/ redundant now IMO
+            ProgressStages(
+                data=data_dict, url=email_url, url_accept_price=price_accept_url
+            ).pricing_in_progress_stage()
+
             context = self.get_context_data(**kwargs)
             self.request.session.delete_test_cookie()
             return self.render_to_response(context)

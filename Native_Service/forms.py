@@ -1,5 +1,5 @@
 from django import forms
-from .models import NativePost, FinalPricing
+from .models import NativePost
 
 
 MONTHS = {
@@ -17,8 +17,8 @@ MONTHS = {
     12: "grudzień",
 }
 
-
-class NativePostForm(forms.ModelForm):
+class PricingForm(forms.ModelForm):
+    """ Basic form for all categories. """
 
     email = forms.CharField(label="Email", max_length=100, widget=forms.EmailInput())
     date_to_be_done = forms.DateField(
@@ -34,6 +34,8 @@ class NativePostForm(forms.ModelForm):
         required=False,
     )
     secret_key = forms.CharField(required=True, widget=forms.HiddenInput())
+    slug = forms.CharField(required=True, widget=forms.HiddenInput())
+
 
     class Meta:
         model = NativePost
@@ -49,10 +51,55 @@ class NativePostForm(forms.ModelForm):
             "description",
             "file",
             "secret_key",
+            "slug",
         )
 
 
+class BusinessForm(PricingForm):
+    category = forms.CharField(max_length=50, initial="REPREZENTOWANIE FIRM", widget=forms.HiddenInput())
+
+    class Meta:
+        model = NativePost
+        fields = (
+            "category",
+            "name",
+            "last_name",
+            "title",
+            "priority",
+            "email",
+            "phone",
+            "date_to_be_done",
+            "description",
+            "file",
+            "secret_key",
+            "slug",
+        )
+
+class OfficialForm(forms.ModelForm):
+    pass
+
+class JobHomeCarForm(forms.ModelForm):
+    pass
+
+class TranslatingForm(forms.ModelForm):
+    pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class FinalPricingForm(forms.ModelForm):
+    """ Performer form to set a price for costumer. """
+
     time_to_get_ready = forms.DateField(
         widget=forms.SelectDateWidget(months=MONTHS), label="Data planowanej realizacji"
     )
@@ -63,5 +110,5 @@ class FinalPricingForm(forms.ModelForm):
     secret_key = forms.CharField(required=True, widget=forms.HiddenInput())
 
     class Meta:
-        model = FinalPricing
+        model = NativePost
         fields = ("time_to_get_ready", "price", "comments", "secret_key")
