@@ -13,7 +13,7 @@ urlpatterns = [
         "final_pricing/<slug:slug>/", views.FinalPricing.as_view(), name="final_pricing"
     ),
     path(
-        "final_pricing/<slug:slug>/final-pricing-submit/",
+        "final_pricing_submit/",
         views.FinalPricingSubmit.as_view(),
         name="final_pricing_submit",
     ),
@@ -34,3 +34,4 @@ urlpatterns = [
         "translating_form", views.TranslatingFormView.as_view(), name="translating_form"
     ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

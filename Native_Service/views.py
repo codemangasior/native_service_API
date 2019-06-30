@@ -13,6 +13,7 @@ from Native_Service.lib.native_service import ProgressStages
 from Native_Service.lib.native_service import UrlsGenerator
 from Native_Service.lib.native_service import SecretKey
 import datetime
+from django.urls import reverse_lazy, reverse
 
 # todo Views need to return 404 errors while any bugs appear
 
@@ -41,7 +42,7 @@ class Pricing(FormView):
     """ Pricing view for not logged in users. """
 
     template_name = "pricing.html"
-    success_url = "/pricing_submit"
+    success_url = reverse_lazy("Native_Service:submit_pricing")
     form_class = PricingForm
     secret_key = None
     files = None
@@ -138,8 +139,8 @@ class FinalPricing(UpdateView):
 
     model = NativePost
     template_name_suffix = "_update_form"
-    success_url = "final-pricing-submit"
     form_class = FinalPricingForm
+    success_url = reverse_lazy("Native_Service:final_pricing_submit")
 
     def get(self, request, *args, **kwargs):
         self.request.session.set_test_cookie()
@@ -147,9 +148,11 @@ class FinalPricing(UpdateView):
         # Gets 'secret_key' from url
         path = self.request.path
         secret_key = path.rsplit("/")[-2]
+        self.some = secret_key
 
         # Passing secret_key by session to other methods
         self.request.session["secret_key"] = secret_key
+
 
         # Render only if secret key exists in db
         if secret_key == _get_data_from_models(secret_key)["secret_key"]:
