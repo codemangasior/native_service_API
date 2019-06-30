@@ -2,7 +2,6 @@ from django.core.files.storage import FileSystemStorage
 from django.core.files.base import ContentFile
 from django.conf import settings
 from django.views.generic import FormView, TemplateView, UpdateView
-from django.shortcuts import render
 from .models import NativePost
 from .forms import PricingForm
 from .forms import FinalPricingForm
@@ -58,27 +57,17 @@ class Pricing(FormView):
         self.initial = {"secret_key": secret_key, "slug": secret_key}
         return self.render_to_response(self.get_context_data())
 
-    def post(self, request, *args, **kwargs):
-        """Method posts form and saves the files in storage """
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
+    def form_valid(self, form):
+        """ Form validation with an email alert, and files support for NativeService. """
 
         # Makes list of files
-        self.files = request.FILES.getlist("file")
+        self.files = self.request.FILES.getlist("file")
 
-        if form.is_valid():
-            path = settings.MEDIA_ROOT + f"uploads/{datetime.date.today()}/"
-            for f in self.files:
-
-                fs = FileSystemStorage(location=path)
-                fs.save(f"{f}".replace(" ", "_"), ContentFile(f.read()))
-
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
-
-    def form_valid(self, form):
-        """ Form validation with an email alert for NativeService. """
+        # Saves files to the path directory
+        path = settings.MEDIA_ROOT + f"uploads/{datetime.date.today()}/"
+        for f in self.files:
+            fs = FileSystemStorage(location=path)
+            fs.save(f"{f}".replace(" ", "_"), ContentFile(f.read()))
 
         # Gets secret_key from session
         secret_key = self.request.session["secret_key"]
@@ -89,7 +78,9 @@ class Pricing(FormView):
         # Creates custom url for performer
         url = UrlsGenerator().final_pricing_url_genrator(secret_key)
         # Initializing Progress Stages library
-        ProgressStages(form.cleaned_data, self.files, url).in_queue_stage()
+        ProgressStages().in_queue_stage(
+            data=form.cleaned_data, files=self.files, url=url
+        )
 
         self.request.session.set_test_cookie()
         return super().form_valid(form)
@@ -123,25 +114,23 @@ class TranslatingFormView(Pricing):
     form_class = TranslatingForm
 
 
-class SubmitPricing(Pricing):
+class SubmitPricing(TemplateView):
     """ Correct form view for CUSTOMER protected by session. """
 
+    template_name = "pricing_submit.html"
+
     def get(self, request, *args, **kwargs):
+        """ Form data rendering in submit view. Protected by session. """
+
         if self.request.session.test_cookie_worked():
             # Gets secret_key from session
             self.secret_key = self.request.session["secret_key"]
-            return self.render_to_response(self.get_context_data())
 
-    def render_to_response(self, context, **response_kwargs):
-        """ Form data rendering in submit view. Protected by session. """
-        template_name = "pricing_submit.html"
-
-        if self.request.session.test_cookie_worked():
             # Function gets all data from all models with secret_key
             data_dict = _get_data_from_models(self.secret_key)
 
             self.request.session.delete_test_cookie()
-            return render(self.request, template_name, data_dict)
+            return self.render_to_response(data_dict)
 
 
 class FinalPricing(UpdateView):
@@ -153,6 +142,8 @@ class FinalPricing(UpdateView):
     form_class = FinalPricingForm
 
     def get(self, request, *args, **kwargs):
+        self.request.session.set_test_cookie()
+
         # Gets 'secret_key' from url
         path = self.request.path
         secret_key = path.rsplit("/")[-2]
@@ -163,11 +154,6 @@ class FinalPricing(UpdateView):
         # Render only if secret key exists in db
         if secret_key == _get_data_from_models(secret_key)["secret_key"]:
             return super().get(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-
-        self.request.session.set_test_cookie()
-        return super().post(request, *args, **kwargs)
 
 
 class FinalPricingSubmit(TemplateView):
@@ -187,13 +173,8 @@ class FinalPricingSubmit(TemplateView):
             # Creates url for customer to see price
             email_url = UrlsGenerator().accept_view_url_generator(secret_key)
 
-            # Creates url which gives possibility to accept price by customer
-            price_accept_url = UrlsGenerator().accept_price_url_generator(secret_key)
-
-            # Setting stage in Progress Stages library      #todo \/ redundant now IMO
-            ProgressStages(
-                data=data_dict, url=email_url, url_accept_price=price_accept_url
-            ).pricing_in_progress_stage()
+            # Setting stage in Progress Stages library
+            ProgressStages().pricing_in_progress_stage(data=data_dict, url=email_url)
 
             context = self.get_context_data(**kwargs)
             self.request.session.delete_test_cookie()

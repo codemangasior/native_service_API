@@ -1,8 +1,6 @@
 from django.db import models
-from django.urls import reverse
 
 
-# todo create 4 forms based on this model with 4 other views and defaults prefills.
 class NativePost(models.Model):
 
     PRIORITY_CHOICE = [
@@ -36,7 +34,7 @@ class NativePost(models.Model):
     description = models.TextField(verbose_name="Opis zlecenia")
     # todo model shows only one file when more of them are uploaded
     secret_key = models.CharField(max_length=45)
-    file = models.FileField(upload_to="uploads/%Y/%m/%d/", null=True)
+    file = models.FileField(null=True, blank=True)
     slug = models.SlugField(unique=True)
     time_to_get_ready = models.DateField(
         verbose_name="Szacowany czas realizacji zlecenia", null=True
@@ -46,11 +44,3 @@ class NativePost(models.Model):
 
     def __str__(self):
         return f"{self.name} {self.last_name} tel:{self.phone} key:{self.secret_key}"
-
-    def get_absolute_url(self):
-        return reverse("test", kwargs={"slug": self.secret_key})
-
-    """
-    def get_absolute_url(self):
-        return reverse("finalpricing", kwargs={"secret_key": self.secret_key})
-    """

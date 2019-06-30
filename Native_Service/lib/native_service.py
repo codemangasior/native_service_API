@@ -17,22 +17,17 @@ class STAGES:
 class ProgressStages:
     """ Basic logic of email alert system. """
 
-    def __init__(self, data=None, files=None, url=None, url_accept_price=None):
-        self.current_stage = None
-        self.data = data
-        self.files = files
-        self.url = url
-        self.url_accept_price = url_accept_price
+    current_stage = None
 
-    def in_queue_stage(self):
+    def in_queue_stage(self, data=None, files=None, url=None):
         self.current_stage = STAGES.IN_QUEUE
         # todo emails needs new files urls
-        EmailGenerator().performer_queue_alert_email(self.data, self.files, self.url)
-        EmailGenerator().customer_queue_alert_email(self.data, self.files)
+        EmailGenerator().performer_queue_alert_email(data, files, url)
+        EmailGenerator().customer_queue_alert_email(data, files)
 
-    def pricing_in_progress_stage(self):
+    def pricing_in_progress_stage(self, data=None, url=None):
         self.current_stage = STAGES.PRICING_IN_PROGRESS
-        EmailGenerator().customer_price_accept_email(self.data, self.url)
+        EmailGenerator().customer_price_accept_email(data, url)
 
     def accepted_stage(self):
         self.current_stage = STAGES.ACCEPTED
