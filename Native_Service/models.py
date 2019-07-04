@@ -41,9 +41,7 @@ class NativePost(models.Model):
     )
     price = models.CharField(max_length=10, verbose_name="Cena", null=True)
     comments = models.TextField(verbose_name="Komentarz do zlecenia", null=True)
-    file = models.FileField(
-        null=True, blank=True, upload_to="uploads/%Y/%m/%d/", verbose_name="Plik"
-    )
+    file = models.CharField(null=True, blank=True, verbose_name="Plik", max_length=100)
 
     def __str__(self):
         return f"{self.name} {self.last_name} tel:{self.phone} key:{self.secret_key}"

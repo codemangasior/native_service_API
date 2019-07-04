@@ -2,6 +2,7 @@ import os
 from django.conf import settings
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
+import datetime
 
 os.environ["DJANGO_SETTINGS_MODULE"] = "Native_Service.settings_module"
 
@@ -19,10 +20,10 @@ class ProgressStages:
 
     current_stage = None
 
-    def in_queue_stage(self, data=None, files=None, url=None):
+    def in_queue_stage(self, data=None, files=None, url=None, secret_key=None):
         self.current_stage = STAGES.IN_QUEUE
         # todo emails needs new files urls
-        EmailGenerator().performer_queue_alert_email(data, files, url)
+        EmailGenerator().performer_queue_alert_email(data, files, url, secret_key)
         EmailGenerator().customer_queue_alert_email(data, files)
 
     def pricing_in_progress_stage(self, data=None, url=None):
@@ -53,10 +54,12 @@ class SecretKey:
 class UrlsGenerator:
     """ The class contains all methods generating URL's"""
 
-    def files_urls_list_creating(self, file_data):
+    def files_urls_list_creating(self, file_data, secret_key):
         """ Method generates uploaded file list. """
         return [
-            f"{settings.HOST_URL}{settings.MEDIA_URL}{f}\n".replace(" ", "_")
+            f"{settings.HOST_URL}{settings.MEDIA_URL}uploads/{datetime.date.today()}/{secret_key}/{f}\n".replace(
+                " ", ""
+            )
             for f in file_data
         ]
 
@@ -76,7 +79,9 @@ class UrlsGenerator:
 class EmailGenerator:
     """ The class contains all email sending methods. """
 
-    def performer_queue_alert_email(self, data, files="No files.", url="No url."):
+    def performer_queue_alert_email(
+        self, data, files="No files.", url="No url.", secret_key=None
+    ):
         recipients_list = settings.PERFORMERS_LIST
 
         send_mail(
@@ -89,7 +94,7 @@ class EmailGenerator:
             f"Telefon: {data['phone']}\n"
             f"Data najpóźniejszej realizacji: {data['date_to_be_done']}\n"
             f"Opis: {data['description']}\n"
-            f"{''.join(UrlsGenerator().files_urls_list_creating(files))}"
+            f"{''.join(UrlsGenerator().files_urls_list_creating(files, secret_key))}"
             f"\n\nTen email został'wygenerowany automatycznie. Prosimy o nie odpowiadanie na wiadomość.\n"
             f"Wejdź na {url} i dokonaj wyceny.",
             settings.SENDER,
@@ -113,8 +118,7 @@ class EmailGenerator:
             f"Email: {data['email']}\n"
             f"Telefon: {data['phone']}\n"
             f"Data najpóźniejszej realizacji {data['date_to_be_done']}\n"
-            f"Opis: {data['description']}\n"
-            f"{''.join(UrlsGenerator().files_urls_list_creating(files))}"
+            f"Opis: {data['description']}\n\n"
             f"\n\nTen email został'wygenerowany automatycznie. Prosimy o nie odpowiadanie na wiadomość.",
             settings.SENDER,
             recipients_list,

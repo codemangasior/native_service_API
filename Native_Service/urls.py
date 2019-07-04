@@ -2,6 +2,15 @@ from django.urls import path
 from Native_Service import views
 from django.conf.urls.static import static
 from django.conf import settings
+from django.conf.urls import re_path, include, url
+from django.contrib.auth.decorators import login_required
+from django.views.static import serve
+from django.conf import settings
+
+
+@login_required
+def protected_serve(request, path, document_root=None, show_indexes=False):
+    return serve(request, path, document_root, show_indexes)
 
 
 app_name = "Native_Service"
@@ -32,5 +41,10 @@ urlpatterns = [
     path("jobhomecar_form", views.JobHomeCarFormView.as_view(), name="jobhomecar_form"),
     path(
         "translating_form", views.TranslatingFormView.as_view(), name="translating_form"
+    ),
+    re_path(
+        r"^%s(?P<path>.*)$" % settings.MEDIA_URL[1:],
+        protected_serve,
+        {"document_root": settings.MEDIA_ROOT},
     ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

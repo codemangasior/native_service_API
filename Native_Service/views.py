@@ -14,6 +14,7 @@ from Native_Service.lib.native_service import UrlsGenerator
 from Native_Service.lib.native_service import SecretKey
 import datetime
 from django.urls import reverse_lazy
+from django.utils.crypto import get_random_string
 
 
 """
@@ -65,15 +66,23 @@ class Pricing(FormView):
         # Makes list of files
         self.files = self.request.FILES.getlist("file")
 
-        # Saves files to the path directory
-        server_patch = f"uploads/{datetime.date.today()}/"
-        path = settings.MEDIA_ROOT + server_patch
-        for f in self.files:
-            fs = FileSystemStorage(location=path)
-            fs.save(f"{f}".replace(" ", "_"), ContentFile(f.read()))
-
         # Gets secret_key from session
         secret_key = self.request.session["secret_key"]
+
+        # Creates empty list prepared for coded files names
+        list_of_coded_files = []
+
+        # Saves files to the path directory
+        path = settings.MEDIA_ROOT + f"uploads/{datetime.date.today()}/{secret_key}/"
+        for f in self.files:
+            fs = FileSystemStorage(location=path)
+            extension = str(f).rsplit(".")[-1]
+            file_name = (f"{get_random_string(12)}.{extension}").replace(" ", "")
+            list_of_coded_files.append(file_name)
+
+            # Saves file content as coded filename
+            fs.save(file_name, ContentFile(f.read()))
+
         post = form.save(commit=False)
         post.save()
 
@@ -81,7 +90,10 @@ class Pricing(FormView):
         url = UrlsGenerator().final_pricing_url_genrator(secret_key)
         # Initializing Progress Stages library
         ProgressStages().in_queue_stage(
-            data=form.cleaned_data, files=self.files, url=url
+            data=form.cleaned_data,
+            files=list_of_coded_files,
+            url=url,
+            secret_key=secret_key,
         )
 
         self.request.session.set_test_cookie()
