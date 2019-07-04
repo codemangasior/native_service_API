@@ -13,9 +13,8 @@ from Native_Service.lib.native_service import ProgressStages
 from Native_Service.lib.native_service import UrlsGenerator
 from Native_Service.lib.native_service import SecretKey
 import datetime
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse_lazy
 
-# todo Views need to return 404 errors while any bugs appear
 
 """
 def dispatch(self, request, *args, **kwargs):
@@ -41,6 +40,8 @@ class IndexCategorySelect(TemplateView):
 class Pricing(FormView):
     """ Pricing view for not logged in users. """
 
+    # formset = inlineformset_factory(UploadedFile, NativePost, fields=("file",), extra=1)
+
     template_name = "pricing.html"
     success_url = reverse_lazy("Native_Service:submit_pricing")
     form_class = PricingForm
@@ -65,7 +66,8 @@ class Pricing(FormView):
         self.files = self.request.FILES.getlist("file")
 
         # Saves files to the path directory
-        path = settings.MEDIA_ROOT + f"uploads/{datetime.date.today()}/"
+        server_patch = f"uploads/{datetime.date.today()}/"
+        path = settings.MEDIA_ROOT + server_patch
         for f in self.files:
             fs = FileSystemStorage(location=path)
             fs.save(f"{f}".replace(" ", "_"), ContentFile(f.read()))
@@ -73,7 +75,6 @@ class Pricing(FormView):
         # Gets secret_key from session
         secret_key = self.request.session["secret_key"]
         post = form.save(commit=False)
-        # print(self.request.FILES.path)
         post.save()
 
         # Creates custom url for performer
@@ -152,7 +153,6 @@ class FinalPricing(UpdateView):
 
         # Passing secret_key by session to other methods
         self.request.session["secret_key"] = secret_key
-
 
         # Render only if secret key exists in db
         if secret_key == _get_data_from_models(secret_key)["secret_key"]:

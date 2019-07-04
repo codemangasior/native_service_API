@@ -52,6 +52,7 @@ class PricingForm(forms.ModelForm):
             "file",
             "secret_key",
             "slug",
+            "file",
         )
 
 

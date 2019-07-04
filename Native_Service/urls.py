@@ -34,4 +34,3 @@ urlpatterns = [
         "translating_form", views.TranslatingFormView.as_view(), name="translating_form"
     ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-

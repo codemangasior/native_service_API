@@ -29,18 +29,21 @@ class NativePost(models.Model):
     )
     email = models.CharField(max_length=100, verbose_name="Email")
     phone = models.CharField(max_length=20, verbose_name="Numer Telefonu")
-    date_time = models.DateTimeField(auto_now_add=True)
+    create = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
     date_to_be_done = models.DateField()
     description = models.TextField(verbose_name="Opis zlecenia")
     # todo model shows only one file when more of them are uploaded
     secret_key = models.CharField(max_length=45)
-    file = models.FileField(null=True, blank=True)
     slug = models.SlugField(unique=True)
     time_to_get_ready = models.DateField(
         verbose_name="Szacowany czas realizacji zlecenia", null=True
     )
     price = models.CharField(max_length=10, verbose_name="Cena", null=True)
     comments = models.TextField(verbose_name="Komentarz do zlecenia", null=True)
+    file = models.FileField(
+        null=True, blank=True, upload_to="uploads/%Y/%m/%d/", verbose_name="Plik"
+    )
 
     def __str__(self):
         return f"{self.name} {self.last_name} tel:{self.phone} key:{self.secret_key}"
