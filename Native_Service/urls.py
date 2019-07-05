@@ -1,11 +1,10 @@
 from django.urls import path
-from Native_Service import views
-from django.conf.urls.static import static
 from django.conf import settings
-from django.conf.urls import re_path, include, url
+from django.conf.urls import re_path
+from django.conf.urls.static import static
 from django.contrib.auth.decorators import login_required
 from django.views.static import serve
-from django.conf import settings
+from Native_Service import views
 
 
 @login_required
@@ -21,6 +20,7 @@ urlpatterns = [
     path(
         "final_pricing/<slug:slug>/", views.FinalPricing.as_view(), name="final_pricing"
     ),
+    path("file_list/<slug:slug>/", views.FileListView.as_view(), name="file_list"),
     path(
         "final_pricing_submit/",
         views.FinalPricingSubmit.as_view(),

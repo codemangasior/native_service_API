@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}NativeService API - Test{% endblock %}
+{% block title %}NativeService API - Wycena zlecenia{% endblock %}
 {% block content %}
 
 
@@ -54,14 +54,14 @@
 						{% endif %}
 					</div>
 				{% endfor %}
-    <input type="submit" value="Update">
+    <input type="submit" value="Wyślij">
 </form>
+
+	<a href="{{ file_list_url }}" target="_blank"><button class="btn">LISTA PLIKÓW</button></a>
 	</div>
 	<div class="step info">
 		<p>
-			Wycenę zlecenia otrzymasz już w ciągu <strong>15 minut</strong>! Po akceptacji warunków zlecenia będziesz na
-			bieżąco informowany o statusie Twojego zlecenia przy pomocy wiadomości email. Zaraz po zakończeniu realizacji
-			otrzymasz dokument prosto na swoją pocztę email.
+			Pamiętaj aby nikomu nie udostępniać danych, które właśnie widzisz.
 		</p>
 	</div>
 </div>

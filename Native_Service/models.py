@@ -29,6 +29,7 @@ class NativePost(models.Model):
     )
     email = models.CharField(max_length=100, verbose_name="Email")
     phone = models.CharField(max_length=20, verbose_name="Numer Telefonu")
+    url_date = models.DateField(auto_now_add=True)
     create = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     date_to_be_done = models.DateField()
@@ -41,7 +42,9 @@ class NativePost(models.Model):
     )
     price = models.CharField(max_length=10, verbose_name="Cena", null=True)
     comments = models.TextField(verbose_name="Komentarz do zlecenia", null=True)
-    file = models.CharField(null=True, blank=True, verbose_name="Plik", max_length=100)
+    # todo increse lenght to 255
+    file = models.CharField(null=True, blank=True, verbose_name="Plik", max_length=255)
+    list_files = models.TextField(null=True, blank=True, verbose_name="Lista")
 
     def __str__(self):
         return f"{self.name} {self.last_name} tel:{self.phone} key:{self.secret_key}"

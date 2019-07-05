@@ -29,6 +29,8 @@ class PricingForm(forms.ModelForm):
     description = forms.CharField(
         label="Opis zlecenia", max_length=1000, widget=forms.Textarea
     )
+    # todo validation for doc, docx, pdf, txt, png, jpeg, jpg, webp
+    # todo set size limits
     file = forms.FileField(
         label="Plik",
         widget=forms.ClearableFileInput(attrs={"multiple": True}),

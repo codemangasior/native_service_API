@@ -1,7 +1,12 @@
 from django.core.files.storage import FileSystemStorage
 from django.core.files.base import ContentFile
 from django.conf import settings
-from django.views.generic import FormView, TemplateView, UpdateView
+from django.views.generic import FormView
+from django.views.generic import TemplateView
+from django.views.generic import UpdateView
+from django.urls import reverse_lazy
+from django.utils.crypto import get_random_string
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import NativePost
 from .forms import PricingForm
 from .forms import FinalPricingForm
@@ -13,8 +18,7 @@ from Native_Service.lib.native_service import ProgressStages
 from Native_Service.lib.native_service import UrlsGenerator
 from Native_Service.lib.native_service import SecretKey
 import datetime
-from django.urls import reverse_lazy
-from django.utils.crypto import get_random_string
+import json
 
 
 """
@@ -70,15 +74,16 @@ class Pricing(FormView):
         secret_key = self.request.session["secret_key"]
 
         # Creates empty list prepared for coded files names
-        list_of_coded_files = []
+        coded_files_list = []
 
         # Saves files to the path directory
         path = settings.MEDIA_ROOT + f"uploads/{datetime.date.today()}/{secret_key}/"
         for f in self.files:
             fs = FileSystemStorage(location=path)
+            # todo needs to better support files without extension
             extension = str(f).rsplit(".")[-1]
             file_name = (f"{get_random_string(12)}.{extension}").replace(" ", "")
-            list_of_coded_files.append(file_name)
+            coded_files_list.append(file_name)
 
             # Saves file content as coded filename
             fs.save(file_name, ContentFile(f.read()))
@@ -87,14 +92,16 @@ class Pricing(FormView):
         post.save()
 
         # Creates custom url for performer
-        url = UrlsGenerator().final_pricing_url_genrator(secret_key)
+        url = UrlsGenerator().view_FinalPricing_url(secret_key)
         # Initializing Progress Stages library
         ProgressStages().in_queue_stage(
             data=form.cleaned_data,
-            files=list_of_coded_files,
+            files=coded_files_list,
             url=url,
             secret_key=secret_key,
         )
+        # Passing coded_files_list by session to other methods
+        self.request.session["coded_files_list"] = coded_files_list
 
         self.request.session.set_test_cookie()
         return super().form_valid(form)
@@ -138,13 +145,51 @@ class SubmitPricing(TemplateView):
 
         if self.request.session.test_cookie_worked():
             # Gets secret_key from session
-            self.secret_key = self.request.session["secret_key"]
+            secret_key = self.request.session["secret_key"]
+
+            # Gets coded_files_data from session
+            coded_files_data = self.request.session["coded_files_list"]
 
             # Function gets all data from all models with secret_key
-            data_dict = _get_data_from_models(self.secret_key)
+            data_dict = _get_data_from_models(secret_key)
+
+            # coded_files_list >>> coding as JSON and saves in NativePost(current order) database
+            json_coded = json.dumps(coded_files_data)
+            post = NativePost.objects.get(secret_key=secret_key)
+            post.list_files = json_coded
+            post.save()
 
             self.request.session.delete_test_cookie()
             return self.render_to_response(data_dict)
+
+
+class FileListView(LoginRequiredMixin, TemplateView):
+    """ Special view for logged in performer to can see all files. """
+
+    template_name = "file_list.html"
+
+    def get_context_data(self, **kwargs):
+        # Gets 'secret_key' from url
+        path = self.request.path
+        secret_key = path.rsplit("/")[-2]
+
+        # Function gets all data from all models with secret_key
+        context = _get_data_from_models(secret_key)
+        url_date = context["url_date"]
+
+        # Decoding JSON file to python list back
+        jsonDec = json.decoder.JSONDecoder()
+        coded_files_list = jsonDec.decode(context["list_files"])
+
+        # Builds files urls list
+        performer_urls_list = UrlsGenerator().list_order_files_for_FileListView(
+            secret_key=secret_key, coded_files_list=coded_files_list, url_date=url_date
+        )
+        context["performer_urls_list"] = performer_urls_list
+
+        # Render only if secret key exists in db
+        if secret_key == _get_data_from_models(secret_key)["secret_key"]:
+            return context
 
 
 class FinalPricing(UpdateView):
@@ -157,22 +202,29 @@ class FinalPricing(UpdateView):
 
     def get(self, request, *args, **kwargs):
         self.request.session.set_test_cookie()
+        self.object = self.get_object()
+        context = self.get_context_data(object=self.object)
 
         # Gets 'secret_key' from url
         path = self.request.path
         secret_key = path.rsplit("/")[-2]
-        self.some = secret_key
+
+        # Creates FileListView url
+        file_list_url = UrlsGenerator().view_FileListView_url(secret_key)
 
         # Passing secret_key by session to other methods
         self.request.session["secret_key"] = secret_key
 
+        # Updates context
+        context["file_list_url"] = file_list_url
+
         # Render only if secret key exists in db
         if secret_key == _get_data_from_models(secret_key)["secret_key"]:
-            return super().get(request, *args, **kwargs)
+            return self.render_to_response(context)
 
 
 class FinalPricingSubmit(TemplateView):
-    """ Simple form submit view. """
+    """ Submit view for performer. """
 
     template_name = "final_pricing_submit.html"
 
@@ -186,7 +238,7 @@ class FinalPricingSubmit(TemplateView):
             data_dict = _get_data_from_models(secret_key)
 
             # Creates url for customer to see price
-            email_url = UrlsGenerator().accept_view_url_generator(secret_key)
+            email_url = UrlsGenerator().view_PriceForCustomer_url(secret_key)
 
             # Setting stage in Progress Stages library
             ProgressStages().pricing_in_progress_stage(data=data_dict, url=email_url)
@@ -215,15 +267,17 @@ class PriceForCustomer(TemplateView):
         data_dict = _get_data_from_models(secret_key)
 
         # Creates url which gives possibility to accept price by customer
-        price_accept_url = UrlsGenerator().accept_price_url_generator(secret_key)
+        price_accept_url = UrlsGenerator().view_PriceAcceptedDotpay_url(secret_key)
         data_dict.update({"accept_url": price_accept_url})
 
         return self.render_to_response(data_dict)
 
 
 class PriceAcceptedDotpay(TemplateView):
-    template_name = "price_accepted.html"
     """ View for a customer to use Dotpay. """
+
+    template_name = "price_accepted.html"
+
     # todo email alert for performer about waiting for payment
     def get(self, request, *args, **kwargs):
         if self.request.session.test_cookie_worked():

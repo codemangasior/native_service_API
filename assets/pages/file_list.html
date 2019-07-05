@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}NativeService API - Lista plików{% endblock %}
+{% block content %}
+
+
+<div class="second bar">
+		<h1>Lista plików</h1>
+	<p>
+		Zlecenie: {{ title }}, SECRET_KEY: {{ secret_key }}, Dada dodania: {{ create }}.
+	</p>
+</div>
+<div class="body seventy">
+<!-- container -->
+	<div class="stepbystep">
+		<div class="container">
+		{% for url in performer_urls_list %}
+			<div class="box price">
+			<a href="{{ url }}">{{ url }}</a><br>
+			<img class="file preview" src="{{ url }}" alt="file">
+			</div>
+			{% endfor %}
+
+
+		</div>
+		<div class="step info">
+		<p>
+			Pamiętaj aby nikomu nie udostępniać danych, które właśnie widzisz.
+		</p>
+	</div>
+</div>
+</div>
+{% endblock %}

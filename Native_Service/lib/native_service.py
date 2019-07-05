@@ -54,7 +54,23 @@ class SecretKey:
 class UrlsGenerator:
     """ The class contains all methods generating URL's"""
 
-    def files_urls_list_creating(self, file_data, secret_key):
+    def view_FinalPricing_url(self, secret_key):
+        """ Method generates url for performer to make some price. """
+        return f"{settings.HOST_URL}/final_pricing/{secret_key}/"
+
+    def view_PriceForCustomer_url(self, secret_key):
+        """ Method generates url for customer to see price. """
+        return f"{settings.HOST_URL}/price_for_you/{secret_key}/"
+
+    def view_PriceAcceptedDotpay_url(self, secret_key):
+        """ Method generates url for customer for price accept. """
+        return f"{settings.HOST_URL}/price_accepted/{secret_key}/"
+
+    def view_FileListView_url(self, secret_key):
+        """ Method generates url for performer to see list of files. """
+        return f"{settings.HOST_URL}/file_list/{secret_key}/"
+
+    def list_files_urls_create(self, file_data, secret_key):
         """ Method generates uploaded file list. """
         return [
             f"{settings.HOST_URL}{settings.MEDIA_URL}uploads/{datetime.date.today()}/{secret_key}/{f}\n".replace(
@@ -63,17 +79,12 @@ class UrlsGenerator:
             for f in file_data
         ]
 
-    def final_pricing_url_genrator(self, secret_key):
-        """ Method generates url for performer to make some price. """
-        return f"{settings.LOCAL_HOST_URL}/final_pricing/{secret_key}/"
-
-    def accept_view_url_generator(self, secret_key):
-        """ Method generates url for customer to see price. """
-        return f"{settings.LOCAL_HOST_URL}/price_for_you/{secret_key}/"
-
-    def accept_price_url_generator(self, secret_key):
-        """ Method generates url for customer for price accept. """
-        return f"{settings.LOCAL_HOST_URL}/price_accepted/{secret_key}/"
+    def list_order_files_for_FileListView(self, secret_key, coded_files_list, url_date):
+        """ Method generates url for performer to take look at file list. """
+        return [
+            f"{settings.HOST_URL}/media/uploads/{url_date}/{secret_key}/{f}"
+            for f in coded_files_list
+        ]
 
 
 class EmailGenerator:
@@ -94,7 +105,7 @@ class EmailGenerator:
             f"Telefon: {data['phone']}\n"
             f"Data najpóźniejszej realizacji: {data['date_to_be_done']}\n"
             f"Opis: {data['description']}\n"
-            f"{''.join(UrlsGenerator().files_urls_list_creating(files, secret_key))}"
+            f"{''.join(UrlsGenerator().list_files_urls_create(files, secret_key))}"
             f"\n\nTen email został'wygenerowany automatycznie. Prosimy o nie odpowiadanie na wiadomość.\n"
             f"Wejdź na {url} i dokonaj wyceny.",
             settings.SENDER,
