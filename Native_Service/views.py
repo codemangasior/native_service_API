@@ -82,7 +82,7 @@ class Pricing(FormView):
             fs = FileSystemStorage(location=path)
             # todo needs to better support files without extension
             extension = str(f).rsplit(".")[-1]
-            file_name = (f"{get_random_string(12)}.{extension}").replace(" ", "")
+            file_name = f"{get_random_string(12)}.{extension}".replace(" ", "")
             coded_files_list.append(file_name)
 
             # Saves file content as coded filename
@@ -92,7 +92,7 @@ class Pricing(FormView):
         post.save()
 
         # Creates custom url for performer
-        url = UrlsGenerator().view_FinalPricing_url(secret_key)
+        url = UrlsGenerator().view_finalpricing_url(secret_key)
         # Initializing Progress Stages library
         ProgressStages().in_queue_stage(
             data=form.cleaned_data,
@@ -178,11 +178,11 @@ class FileListView(LoginRequiredMixin, TemplateView):
         url_date = context["url_date"]
 
         # Decoding JSON file to python list back
-        jsonDec = json.decoder.JSONDecoder()
-        coded_files_list = jsonDec.decode(context["list_files"])
+        jsondec = json.decoder.JSONDecoder()
+        coded_files_list = jsondec.decode(context["list_files"])
 
         # Builds files urls list
-        performer_urls_list = UrlsGenerator().list_order_files_for_FileListView(
+        performer_urls_list = UrlsGenerator().list_order_files_for_filelistview(
             secret_key=secret_key, coded_files_list=coded_files_list, url_date=url_date
         )
         context["performer_urls_list"] = performer_urls_list
@@ -210,7 +210,7 @@ class FinalPricing(UpdateView):
         secret_key = path.rsplit("/")[-2]
 
         # Creates FileListView url
-        file_list_url = UrlsGenerator().view_FileListView_url(secret_key)
+        file_list_url = UrlsGenerator().view_filelistview_url(secret_key)
 
         # Passing secret_key by session to other methods
         self.request.session["secret_key"] = secret_key
@@ -238,7 +238,7 @@ class FinalPricingSubmit(TemplateView):
             data_dict = _get_data_from_models(secret_key)
 
             # Creates url for customer to see price
-            email_url = UrlsGenerator().view_PriceForCustomer_url(secret_key)
+            email_url = UrlsGenerator().view_priceforcustomer_url(secret_key)
 
             # Setting stage in Progress Stages library
             ProgressStages().pricing_in_progress_stage(data=data_dict, url=email_url)
@@ -267,7 +267,7 @@ class PriceForCustomer(TemplateView):
         data_dict = _get_data_from_models(secret_key)
 
         # Creates url which gives possibility to accept price by customer
-        price_accept_url = UrlsGenerator().view_PriceAcceptedDotpay_url(secret_key)
+        price_accept_url = UrlsGenerator().view_priceaccepteddotpay_url(secret_key)
         data_dict.update({"accept_url": price_accept_url})
 
         return self.render_to_response(data_dict)

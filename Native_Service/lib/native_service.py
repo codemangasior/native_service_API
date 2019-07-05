@@ -18,29 +18,26 @@ class STAGES:
 class ProgressStages:
     """ Basic logic of email alert system. """
 
-    current_stage = None
-
-    def in_queue_stage(self, data=None, files=None, url=None, secret_key=None):
-        self.current_stage = STAGES.IN_QUEUE
+    @staticmethod
+    def in_queue_stage(data=None, files=None, url=None, secret_key=None):
         # todo emails needs new files urls
         EmailGenerator().performer_queue_alert_email(data, files, url, secret_key)
         EmailGenerator().customer_queue_alert_email(data, files)
 
-    def pricing_in_progress_stage(self, data=None, url=None):
-        self.current_stage = STAGES.PRICING_IN_PROGRESS
+    @staticmethod
+    def pricing_in_progress_stage(data=None, url=None):
         EmailGenerator().customer_price_accept_email(data, url)
 
-    def accepted_stage(self):
-        self.current_stage = STAGES.ACCEPTED
-
+    @staticmethod
+    def accepted_stage():
         pass
 
-    def in_progress_stage(self):
-        self.current_stage = STAGES.IN_PROGRESS
+    @staticmethod
+    def in_progress_stage():
         pass
 
-    def done_stage(self):
-        self.current_stage = STAGES.DONE
+    @staticmethod
+    def done_stage():
         pass
 
 
@@ -54,23 +51,28 @@ class SecretKey:
 class UrlsGenerator:
     """ The class contains all methods generating URL's"""
 
-    def view_FinalPricing_url(self, secret_key):
+    @staticmethod
+    def view_finalpricing_url(secret_key):
         """ Method generates url for performer to make some price. """
         return f"{settings.HOST_URL}/final_pricing/{secret_key}/"
 
-    def view_PriceForCustomer_url(self, secret_key):
+    @staticmethod
+    def view_priceforcustomer_url(secret_key):
         """ Method generates url for customer to see price. """
         return f"{settings.HOST_URL}/price_for_you/{secret_key}/"
 
-    def view_PriceAcceptedDotpay_url(self, secret_key):
+    @staticmethod
+    def view_priceaccepteddotpay_url(secret_key):
         """ Method generates url for customer for price accept. """
         return f"{settings.HOST_URL}/price_accepted/{secret_key}/"
 
-    def view_FileListView_url(self, secret_key):
+    @staticmethod
+    def view_filelistview_url(secret_key):
         """ Method generates url for performer to see list of files. """
         return f"{settings.HOST_URL}/file_list/{secret_key}/"
 
-    def list_files_urls_create(self, file_data, secret_key):
+    @staticmethod
+    def list_files_urls_create(file_data, secret_key):
         """ Method generates uploaded file list. """
         return [
             f"{settings.HOST_URL}{settings.MEDIA_URL}uploads/{datetime.date.today()}/{secret_key}/{f}\n".replace(
@@ -79,7 +81,8 @@ class UrlsGenerator:
             for f in file_data
         ]
 
-    def list_order_files_for_FileListView(self, secret_key, coded_files_list, url_date):
+    @staticmethod
+    def list_order_files_for_filelistview(secret_key, coded_files_list, url_date):
         """ Method generates url for performer to take look at file list. """
         return [
             f"{settings.HOST_URL}/media/uploads/{url_date}/{secret_key}/{f}"
@@ -90,8 +93,9 @@ class UrlsGenerator:
 class EmailGenerator:
     """ The class contains all email sending methods. """
 
+    @staticmethod
     def performer_queue_alert_email(
-        self, data, files="No files.", url="No url.", secret_key=None
+    data, files="No files.", url="No url.", secret_key=None
     ):
         recipients_list = settings.PERFORMERS_LIST
 
@@ -113,7 +117,8 @@ class EmailGenerator:
             fail_silently=False,
         )
 
-    def customer_queue_alert_email(self, data, files="No files."):
+    @staticmethod
+    def customer_queue_alert_email(data, files="No files."):
         recipients_list = [data["email"]]
 
         send_mail(
@@ -136,7 +141,8 @@ class EmailGenerator:
             fail_silently=False,
         )
 
-    def customer_price_accept_email(self, data, url):
+    @staticmethod
+    def customer_price_accept_email(data, url):
         recipients_list = [data["email"]]
         send_mail(
             f"Native Service - wycena zlecenia gotowa.",
