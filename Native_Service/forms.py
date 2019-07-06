@@ -38,6 +38,7 @@ class PricingForm(forms.ModelForm):
     )
     secret_key = forms.CharField(required=True, widget=forms.HiddenInput())
     slug = forms.CharField(required=True, widget=forms.HiddenInput())
+    stage = forms.CharField(initial="W KOLEJCE", widget=forms.HiddenInput())
 
     class Meta:
         model = NativePost
@@ -55,6 +56,7 @@ class PricingForm(forms.ModelForm):
             "secret_key",
             "slug",
             "file",
+            "stage",
         )
 
 

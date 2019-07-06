@@ -191,6 +191,10 @@ class FileListView(LoginRequiredMixin, TemplateView):
         if secret_key == _get_data_from_models(secret_key)["secret_key"]:
             return context
 
+    # todo login redirect view
+    def get_login_url(self):
+        return "http://nativeservice.pl"
+
 
 class FinalPricing(UpdateView):
     """ UpdateView for performer to set a price for customer. """
@@ -241,7 +245,9 @@ class FinalPricingSubmit(TemplateView):
             email_url = UrlsGenerator().view_priceforcustomer_url(secret_key)
 
             # Setting stage in Progress Stages library
-            ProgressStages().pricing_in_progress_stage(data=data_dict, url=email_url)
+            ProgressStages().waiting_for_accept(
+                data=data_dict, url=email_url, secret_key=secret_key
+            )
 
             context = self.get_context_data(**kwargs)
             self.request.session.delete_test_cookie()
@@ -289,6 +295,8 @@ class PriceAcceptedDotpay(TemplateView):
             # Gets 'secret_key' from url
             path = self.request.path
             url_secret_key = path.rsplit("/")[-2]
+
+            ProgressStages().accepted_stage(data=data_dict, secret_key=secret_key)
 
             # Secret_key authorization
             if secret_key == url_secret_key:

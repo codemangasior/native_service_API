@@ -3,16 +3,18 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
 import datetime
+from Native_Service.models import NativePost
 
 os.environ["DJANGO_SETTINGS_MODULE"] = "Native_Service.settings_module"
 
 
 class STAGES:
-    IN_QUEUE = "in_queue"
-    PRICING_IN_PROGRESS = "pricing_in_progress"
-    ACCEPTED = "accepted"
-    IN_PROGRESS = "in_progress"
-    DONE = "done"
+    IN_QUEUE = "W KOLEJCE"
+    WAITING_FOR_ACCEPT = "OCZEKIWANIE NA AKCEPTACJĘ"
+    ACCEPTED = "ZLECENIE ZAAKCEPTOWANE"
+    PAYMENT_DONE = "ZLECENIE OPŁACONE"
+    IN_PROGRESS = "W TRAKCIE REALIZACJI"
+    DONE = "ZLECENIE ZAKOŃCZONE"
 
 
 class ProgressStages:
@@ -25,12 +27,18 @@ class ProgressStages:
         EmailGenerator().customer_queue_alert_email(data, files)
 
     @staticmethod
-    def pricing_in_progress_stage(data=None, url=None):
+    def waiting_for_accept(data=None, url=None, secret_key=None):
         EmailGenerator().customer_price_accept_email(data, url)
+        post = NativePost.objects.get(secret_key=secret_key)
+        post.stage = STAGES.WAITING_FOR_ACCEPT
+        post.save()
 
     @staticmethod
-    def accepted_stage():
-        pass
+    def accepted_stage(data=None, secret_key=None):
+        EmailGenerator().performer_order_accepted(data)
+        post = NativePost.objects.get(secret_key=secret_key)
+        post.stage = STAGES.ACCEPTED
+        post.save()
 
     @staticmethod
     def in_progress_stage():
@@ -95,13 +103,14 @@ class EmailGenerator:
 
     @staticmethod
     def performer_queue_alert_email(
-    data, files="No files.", url="No url.", secret_key=None
+        data, files="No files.", url="No url.", secret_key=None
     ):
         recipients_list = settings.PERFORMERS_LIST
 
         send_mail(
             f"Nowe zlecenie!",
-            f"Wejdź na https://nativeservice.pl/admin/ i sprawdź co na Ciebie czeka.\n"
+            f"Wejdź na https://api.nativeservice.pl/admin/ aby zarządzać zleceniami.\n"
+            f"Dane zlecenia:\n"
             f"Imię: {data['name']}\n"
             f"Nazwisko: {data['last_name']}\n"
             f"Nazwa zlecenia: {data['title']}\n"
@@ -154,6 +163,25 @@ class EmailGenerator:
             f"Uwagi: {data['comments']}.\n"
             f"Aby zapoznać się ze szczegółami kliknij w link: {url}\n"
             f"\n\nTen email został'wygenerowany automatycznie. Prosimy o nie odpowiadanie na wiadomość.",
+            settings.SENDER,
+            recipients_list,
+            fail_silently=False,
+        )
+
+    @staticmethod
+    def performer_order_accepted(data):
+        recipients_list = settings.PERFORMERS_LIST
+
+        send_mail(
+            f"Zlecenie {data['title']} zaakceptowane!",
+            f"Zlecenie zostało zaakceptowane, trwa oczekiwanie na płatność.\n"
+            f"Zostaniesz poinformowany kiedy płatność zostanie zrealizowana.\n"
+            f"Zlecenie: {data['title']}\n"
+            f"Klucz: {data['secret_key']}\n"
+            f"Email: {data['email']}\n"
+            f"Telefon: {data['phone']}\n"
+            f"Ustalony termin realizacji: {data['time_to_get_ready']}\n\n"
+            f"\n\nTen email został'wygenerowany automatycznie. Prosimy o nie odpowiadanie na wiadomość.\n",
             settings.SENDER,
             recipients_list,
             fail_silently=False,

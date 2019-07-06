@@ -3,16 +3,24 @@ from django.db import models
 
 class NativePost(models.Model):
 
-    PRIORITY_CHOICE = [
-        ("WYSOKI", "WYSOKI"),
-        ("STANDARD", "STANDARD"),
-        ("NISKI", "NISKI"),
-    ]
     CATEGORY_CHOICE = [
         ("REPREZENTOWANIE FIRM", "REPREZENTOWANIE FIRM"),
         ("SPRAWY URZĘDOWE", "SPRAWY URZĘDOWE"),
         ("PRACA MIESZKANIE AUTO", "PRACA MIESZKANIE AUTO"),
         ("TŁUMACZENIA", "TŁUMACZENIA"),
+    ]
+    PRIORITY_CHOICE = [
+        ("WYSOKI", "WYSOKI"),
+        ("STANDARD", "STANDARD"),
+        ("NISKI", "NISKI"),
+    ]
+    STAGE = [
+        ("W KOLEJCE", "W KOLEJCE"),
+        ("OCZEKIWANIE NA AKCEPTACJĘ", "OCZEKIWANIE NA AKCEPTACJĘ"),
+        ("ZLECENIE ZAAKCEPTOWANE", "ZLECENIE ZAAKCEPTOWANE"),
+        ("ZLECENIE OPŁACONE", "ZLECENIE OPŁACONE"),
+        ("W TRAKCIE REALIZACJI", "W TRAKCIE REALIZACJI"),
+        ("ZLECENIE ZAKOŃCZONE", "ZLECENIE ZAKOŃCZONE"),
     ]
 
     category = models.CharField(
@@ -26,6 +34,9 @@ class NativePost(models.Model):
         choices=PRIORITY_CHOICE,
         default="STANDARD",
         verbose_name="Priorytet",
+    )
+    stage = models.CharField(
+        max_length=50, choices=STAGE, default="W KOLEJCE", verbose_name="Etap zlecenia"
     )
     email = models.CharField(max_length=100, verbose_name="Email")
     phone = models.CharField(max_length=20, verbose_name="Numer Telefonu")
