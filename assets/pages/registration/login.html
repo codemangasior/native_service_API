@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}NativeService API - Zaloguj się{% endblock %}
+{% block content %}
+	<div class="second bar">
+    <h1>Logowanie</h1>
+	</div>
+	<div class="body seventy">
+    <!-- container -->
+    <div class="stepbystep">
+        <div class="container">
+{% if form.errors %}
+<p>Twoja nazwa użytkownika i hasło nie pasują. Proszę spróbować ponownie.</p>
+{% endif %}
+
+{% if next %}
+    {% if user.is_authenticated %}
+    <p>
+			Nie masz uprawnień do wyświetlenia tej strony. Aby kontynuować zaloguj się.
+		</p>
+    {% else %}
+    <p>Proszę się zalogować, aby wyświetlić zawartość.</p>
+    {% endif %}
+{% endif %}
+
+<form method="post">
+{% csrf_token %}
+<table>
+<tr>
+    <td>{{ form.username.label_tag }}</td>
+    <td>{{ form.username }}</td>
+</tr>
+<tr>
+    <td>{{ form.password.label_tag }}</td>
+    <td>{{ form.password }}</td>
+</tr>
+</table>
+
+<input type="submit" value="login">
+<input type="hidden" name="next" value="{{ next }}">
+</form>
+
+{# Assumes you setup the password_reset view in your URLconf #}
+				 </div>
+        <div class="step info">
+					W razie problemów skontaktuj się z działem <a href="https://nativeservice.pl/contact">wsparcia technicznego</a>.
+        </div>
+    </div>
+</div>
+{% endblock %}

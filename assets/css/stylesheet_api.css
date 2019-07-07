@@ -715,6 +715,20 @@ input[type=submit]:hover {
 	border-radius: 4px;
 }
 
+#id_username{
+	width: 100%;
+	padding: 12px;
+	height: auto;
+	border-radius: 4px;
+}
+
+#id_password{
+	width: 100%;
+	padding: 12px;
+	height: auto;
+	border-radius: 4px;
+}
+
 .file.preview {
 	width: 95%;
 	height: auto;

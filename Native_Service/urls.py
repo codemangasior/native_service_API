@@ -47,4 +47,5 @@ urlpatterns = [
         protected_serve,
         {"document_root": settings.MEDIA_ROOT},
     ),
+    path("login", views.PerformerLoginView.as_view(), name="login"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

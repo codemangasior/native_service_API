@@ -41,6 +41,10 @@ class ProgressStages:
         post.save()
 
     @staticmethod
+    def payment_done_stage():
+        pass
+
+    @staticmethod
     def in_progress_stage():
         pass
 

@@ -7,6 +7,7 @@ from django.views.generic import UpdateView
 from django.urls import reverse_lazy
 from django.utils.crypto import get_random_string
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LoginView
 from .models import NativePost
 from .forms import PricingForm
 from .forms import FinalPricingForm
@@ -14,6 +15,7 @@ from .forms import BusinessForm
 from .forms import OfficialForm
 from .forms import JobHomeCarForm
 from .forms import TranslatingForm
+from .forms import PerformerAuthenticationForm
 from Native_Service.lib.native_service import ProgressStages
 from Native_Service.lib.native_service import UrlsGenerator
 from Native_Service.lib.native_service import SecretKey
@@ -193,7 +195,7 @@ class FileListView(LoginRequiredMixin, TemplateView):
 
     # todo login redirect view
     def get_login_url(self):
-        return "http://nativeservice.pl"
+        return reverse_lazy("Native_Service:login")
 
 
 class FinalPricing(UpdateView):
@@ -302,3 +304,11 @@ class PriceAcceptedDotpay(TemplateView):
             if secret_key == url_secret_key:
                 self.request.session.delete_test_cookie()
                 return self.render_to_response(data_dict)
+
+
+from .forms import CustomAuthenticationForm
+
+
+class PerformerLoginView(LoginView):
+    authentication_form = CustomAuthenticationForm
+    pass
