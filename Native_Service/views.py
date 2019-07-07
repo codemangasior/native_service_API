@@ -15,12 +15,15 @@ from .forms import BusinessForm
 from .forms import OfficialForm
 from .forms import JobHomeCarForm
 from .forms import TranslatingForm
-from .forms import PerformerAuthenticationForm
+from .forms import CustomAuthenticationForm
 from Native_Service.lib.native_service import ProgressStages
 from Native_Service.lib.native_service import UrlsGenerator
 from Native_Service.lib.native_service import SecretKey
 import datetime
 import json
+import urllib
+from urllib import parse
+from urllib import request
 
 
 """
@@ -78,35 +81,54 @@ class Pricing(FormView):
         # Creates empty list prepared for coded files names
         coded_files_list = []
 
-        # Saves files to the path directory
-        path = settings.MEDIA_ROOT + f"uploads/{datetime.date.today()}/{secret_key}/"
-        for f in self.files:
-            fs = FileSystemStorage(location=path)
-            # todo needs to better support files without extension
-            extension = str(f).rsplit(".")[-1]
-            file_name = f"{get_random_string(12)}.{extension}".replace(" ", "")
-            coded_files_list.append(file_name)
-
-            # Saves file content as coded filename
-            fs.save(file_name, ContentFile(f.read()))
-
         post = form.save(commit=False)
-        post.save()
 
-        # Creates custom url for performer
-        url = UrlsGenerator().view_finalpricing_url(secret_key)
-        # Initializing Progress Stages library
-        ProgressStages().in_queue_stage(
-            data=form.cleaned_data,
-            files=coded_files_list,
-            url=url,
-            secret_key=secret_key,
-        )
-        # Passing coded_files_list by session to other methods
-        self.request.session["coded_files_list"] = coded_files_list
+        # reCAPTCHA validation
+        recaptcha_response = self.request.POST.get("g-recaptcha-response")
+        url = "https://www.google.com/recaptcha/api/siteverify"
+        values = {
+            "secret": settings.GOOGLE_RECAPTCHA_SECRET_KEY,
+            "response": recaptcha_response,
+        }
+        data = parse.urlencode(values).encode()
+        req = request.Request(url, data=data)
+        response = urllib.request.urlopen(req)
+        result = json.loads(response.read().decode())
 
-        self.request.session.set_test_cookie()
-        return super().form_valid(form)
+        if result["success"]:
+            post.save()
+
+            # Saves files to the path directory
+            path = (
+                settings.MEDIA_ROOT + f"uploads/{datetime.date.today()}/{secret_key}/"
+            )
+            for f in self.files:
+                fs = FileSystemStorage(location=path)
+                # todo needs to better support files without extension
+                extension = str(f).rsplit(".")[-1]
+                file_name = f"{get_random_string(12)}.{extension}".replace(" ", "")
+                coded_files_list.append(file_name)
+
+                # Saves file content as coded filename
+                fs.save(file_name, ContentFile(f.read()))
+
+            # Creates custom url for performer
+            url = UrlsGenerator().view_finalpricing_url(secret_key)
+            # Initializing Progress Stages library
+            ProgressStages().in_queue_stage(
+                data=form.cleaned_data,
+                files=coded_files_list,
+                url=url,
+                secret_key=secret_key,
+            )
+            # Passing coded_files_list by session to other methods
+            self.request.session["coded_files_list"] = coded_files_list
+
+            self.request.session.set_test_cookie()
+            return super().form_valid(form)
+
+        else:
+            return super().form_invalid(form)
 
 
 class BusinessFormView(Pricing):
@@ -163,6 +185,8 @@ class SubmitPricing(TemplateView):
 
             self.request.session.delete_test_cookie()
             return self.render_to_response(data_dict)
+        else:
+            raise PermissionError("Cookies Error.")
 
 
 class FileListView(LoginRequiredMixin, TemplateView):
@@ -192,6 +216,8 @@ class FileListView(LoginRequiredMixin, TemplateView):
         # Render only if secret key exists in db
         if secret_key == _get_data_from_models(secret_key)["secret_key"]:
             return context
+        else:
+            raise ValueError("SECRET_KEY does not exist.")
 
     # todo login redirect view
     def get_login_url(self):
@@ -227,6 +253,8 @@ class FinalPricing(UpdateView):
         # Render only if secret key exists in db
         if secret_key == _get_data_from_models(secret_key)["secret_key"]:
             return self.render_to_response(context)
+        else:
+            raise ValueError("SECRET_KEY does not exist.")
 
 
 class FinalPricingSubmit(TemplateView):
@@ -254,6 +282,8 @@ class FinalPricingSubmit(TemplateView):
             context = self.get_context_data(**kwargs)
             self.request.session.delete_test_cookie()
             return self.render_to_response(context)
+        else:
+            raise PermissionError("Cookies Error.")
 
 
 class PriceForCustomer(TemplateView):
@@ -304,11 +334,11 @@ class PriceAcceptedDotpay(TemplateView):
             if secret_key == url_secret_key:
                 self.request.session.delete_test_cookie()
                 return self.render_to_response(data_dict)
-
-
-from .forms import CustomAuthenticationForm
+            else:
+                raise ValueError(
+                    "SECRET_KEY does not exist, or you have problem with cookies."
+                )
 
 
 class PerformerLoginView(LoginView):
     authentication_form = CustomAuthenticationForm
-    pass

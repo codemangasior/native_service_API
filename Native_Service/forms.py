@@ -110,12 +110,6 @@ class FinalPricingForm(forms.ModelForm):
         fields = ("time_to_get_ready", "price", "comments", "secret_key")
 
 
-class PerformerAuthenticationForm(AuthenticationForm):
-    def confirm_login_allowed(self, user):
-        if not user.is_active:
-            raise forms.ValidationError("This account is inactive.", code="inactive")
-
-
 class CustomAuthenticationForm(AuthenticationForm):
     username = UsernameField(
         label="Użytkownik", widget=forms.TextInput(attrs={"autofocus": True})
