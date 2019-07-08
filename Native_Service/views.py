@@ -115,12 +115,7 @@ class Pricing(FormView):
             # Creates custom url for performer
             url = UrlsGenerator().view_finalpricing_url(secret_key)
             # Initializing Progress Stages library
-            ProgressStages().in_queue_stage(
-                data=form.cleaned_data,
-                files=coded_files_list,
-                url=url,
-                secret_key=secret_key,
-            )
+            ProgressStages().in_queue_stage(data=form.cleaned_data, url=url)
             # Passing coded_files_list by session to other methods
             self.request.session["coded_files_list"] = coded_files_list
 

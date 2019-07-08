@@ -2,6 +2,9 @@ import os
 from django.conf import settings
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
+from django.template.loader import render_to_string
+from django.template import Context
+from django.core.mail import EmailMultiAlternatives
 import datetime
 from Native_Service.models import NativePost
 
@@ -21,10 +24,9 @@ class ProgressStages:
     """ Basic logic of email alert system. """
 
     @staticmethod
-    def in_queue_stage(data=None, files=None, url=None, secret_key=None):
-        # todo emails needs new files urls
-        EmailGenerator().performer_queue_alert_email(data, files, url, secret_key)
-        EmailGenerator().customer_queue_alert_email(data, files)
+    def in_queue_stage(data=None, url=None):
+        EmailGenerator().customer_queue_alert_html(data)
+        EmailGenerator().performer_queue_alert_html(data, url)
 
     @staticmethod
     def waiting_for_accept(data=None, url=None, secret_key=None):
@@ -174,7 +176,7 @@ class EmailGenerator:
 
     @staticmethod
     def performer_order_accepted(data):
-        recipients_list = settings.PERFORMERS_LIST
+        recipients_list = [data["email"]]
 
         send_mail(
             f"Zlecenie {data['title']} zaakceptowane!",
@@ -190,3 +192,29 @@ class EmailGenerator:
             recipients_list,
             fail_silently=False,
         )
+
+    """ HTML EMAILS """
+
+    @staticmethod
+    def performer_queue_alert_html(data=None, url=None):
+        data["url"] = url
+        subject, from_email = "Nowe zlecenie!", settings.SENDER
+        text_message = f"Nowe zlecenie! {url}"
+
+        msg_html = render_to_string("emails/performer_queue_alert.html", data)
+        msg = EmailMultiAlternatives(
+            subject, text_message, from_email, settings.PERFORMERS_LIST
+        )
+        msg.attach_alternative(msg_html, "text/html")
+        msg.send()
+
+    @staticmethod
+    def customer_queue_alert_html(data=None):
+        recipients_list = [data["email"]]
+        subject, from_email = "Wycena zlecenia w NativeService!", settings.SENDER
+        text_message = f"Wyceniamy Twoje zlecenie, czekaj na kontakt!"
+
+        msg_html = render_to_string("emails/customer_queue_alert.html", data)
+        msg = EmailMultiAlternatives(subject, text_message, from_email, recipients_list)
+        msg.attach_alternative(msg_html, "text/html")
+        msg.send()
