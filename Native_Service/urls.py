@@ -16,6 +16,12 @@ app_name = "Native_Service"
 urlpatterns = [
     path("", views.IndexCategorySelect.as_view(), name="index"),
     path("pricing", views.Pricing.as_view(), name="pricing"),
+    path("business_form", views.BusinessFormView.as_view(), name="business_form"),
+    path("official_form", views.OfficialFormView.as_view(), name="official_form"),
+    path("jobhomecar_form", views.JobHomeCarFormView.as_view(), name="jobhomecar_form"),
+    path(
+        "translating_form", views.TranslatingFormView.as_view(), name="translating_form"
+    ),
     path("pricing_submit", views.SubmitPricing.as_view(), name="submit_pricing"),
     path(
         "final_pricing/<slug:slug>/", views.FinalPricing.as_view(), name="final_pricing"
@@ -36,11 +42,10 @@ urlpatterns = [
         views.PriceAcceptedDotpay.as_view(),
         name="price_accepted",
     ),
-    path("business_form", views.BusinessFormView.as_view(), name="business_form"),
-    path("official_form", views.OfficialFormView.as_view(), name="official_form"),
-    path("jobhomecar_form", views.JobHomeCarFormView.as_view(), name="jobhomecar_form"),
     path(
-        "translating_form", views.TranslatingFormView.as_view(), name="translating_form"
+        "payment_done/<slug:slug>/",
+        views.DotpayPaymentDone.as_view(),
+        name="dotpay_payment_done",
     ),
     re_path(
         r"^%s(?P<path>.*)$" % settings.MEDIA_URL[1:],

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}NativeService API - Płatności{% endblock %}
+{% block content %}
+	{% load static %}
+	<div class="second bar">
+		<h1>
+			Gratulację {{ name }} udało Ci się dokonać płatności.
+		</h1>
+		<p>
+			Twoje zlecenie <strong>{{ title }}</strong> właśnie zmieniło status na <strong>{{ stage }}</strong>!
+		</p>
+	</div>
+	<div class="body seventy">
+		<!-- container -->
+		<div class="stepbystep price">
+			<div class="box price">
+				<p>
+					Zostaniesz natychmiast poinformowany kiedy Twoje zlecenie zmieni status na <strong>"W TRAKCIE REALIZACJI"</strong>
+					oraz kiedy zakończy się realizacja Twojego zlecenia.<br>
+					Pamiętaj aby sprawdzać swoją pocztę email, również folder "spam" oraz "niechciane"!
+				</p>
+			</div>
+		</div>
+	</div>
+
+{% endblock %}

@@ -6,8 +6,6 @@ from django.core.mail import EmailMultiAlternatives
 import datetime
 from Native_Service.models import NativePost
 
-# os.environ["DJANGO_SETTINGS_MODULE"] = "Native_Service.settings_module"
-
 
 class STAGES:
     IN_QUEUE = "W KOLEJCE"
@@ -19,7 +17,7 @@ class STAGES:
 
 
 class ProgressStages:
-    """ Basic logic of email alert system. """
+    """ The basic logic of the email alert system and orders support. """
 
     @staticmethod
     def in_queue_stage(data=None, url=None):
@@ -41,16 +39,22 @@ class ProgressStages:
         post.save()
 
     @staticmethod
-    def payment_done_stage():
-        pass
+    def payment_done_stage(data=None, secret_key=None):
+        post = NativePost.objects.get(secret_key=secret_key)
+        post.stage = STAGES.PAYMENT_DONE
+        post.save()
 
     @staticmethod
-    def in_progress_stage():
-        pass
+    def in_progress_stage(secret_key=None):
+        post = NativePost.objects.get(secret_key=secret_key)
+        post.stage = STAGES.IN_PROGRESS
+        post.save()
 
     @staticmethod
-    def done_stage():
-        pass
+    def done_stage(secret_key=None):
+        post = NativePost.objects.get(secret_key=secret_key)
+        post.stage = STAGES.DONE
+        post.save()
 
 
 class SecretKey:

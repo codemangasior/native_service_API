@@ -342,8 +342,20 @@ class DotpayPaymentDone(TemplateView):
 
     template_name = "successful_payment_dotpay.html"
 
+    def get(self, request, *args, **kwargs):
+        if self.request.session.test_cookie_worked():
 
+            # Gets secret_key from session
+            secret_key = self.request.session["secret_key"]
+            # Function gets all data from all models with secret_key
+            data_dict = _get_data_from_models(secret_key)
 
+            # Setting stage on PAYMENT_DONE
+            if data_dict['stage'] != STAGES.PAYMENT_DONE:
+                ProgressStages().payment_done_stage(data=data_dict, secret_key=secret_key)
+
+            self.request.session.delete_test_cookie()
+            return self.render_to_response(data_dict)
 
 
 """ Backstage Views """
