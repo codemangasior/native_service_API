@@ -19,6 +19,7 @@ from .forms import CustomAuthenticationForm
 from Native_Service.lib.native_service import ProgressStages
 from Native_Service.lib.native_service import UrlsGenerator
 from Native_Service.lib.native_service import SecretKey
+from Native_Service.lib.native_service import STAGES
 import datetime
 import json
 import urllib
@@ -114,7 +115,6 @@ class Pricing(FormView):
 
             # Creates custom url for performer
             url = UrlsGenerator().view_finalpricing_url(secret_key)
-            # Initializing Progress Stages library
             # Initializing Progress Stages library
             ProgressStages().in_queue_stage(data=form.cleaned_data, url=url)
             # Passing coded_files_list by session to other methods
@@ -270,10 +270,11 @@ class FinalPricingSubmit(TemplateView):
             # Creates url for customer to see price
             email_url = UrlsGenerator().view_priceforcustomer_url(secret_key)
 
-            # Setting stage in Progress Stages library
-            ProgressStages().waiting_for_accept(
-                data=data_dict, url=email_url, secret_key=secret_key
-            )
+            # Setting stage on WAITING_FOR_ACCEPT
+            if data_dict["stage"] != STAGES.WAITING_FOR_ACCEPT:
+                ProgressStages().waiting_for_accept(
+                    data=data_dict, url=email_url, secret_key=secret_key
+                )
 
             context = self.get_context_data(**kwargs)
             self.request.session.delete_test_cookie()
@@ -310,7 +311,7 @@ class PriceForCustomer(TemplateView):
 class PriceAcceptedDotpay(TemplateView):
     """ View for a customer to use Dotpay. """
 
-    template_name = "price_accepted.html"
+    template_name = "price_accepted_dotpay.html"
 
     # todo email alert for performer about waiting for payment
     def get(self, request, *args, **kwargs):
@@ -324,17 +325,28 @@ class PriceAcceptedDotpay(TemplateView):
             path = self.request.path
             url_secret_key = path.rsplit("/")[-2]
 
-            ProgressStages().accepted_stage(data=data_dict, secret_key=secret_key)
+            # Setting stage on ACCEPTED
+            if data_dict['stage'] != STAGES.ACCEPTED:
+                ProgressStages().accepted_stage(data=data_dict, secret_key=secret_key)
 
             # Secret_key authorization
             if secret_key == url_secret_key:
-                self.request.session.delete_test_cookie()
                 return self.render_to_response(data_dict)
             else:
                 raise ValueError(
                     "SECRET_KEY does not exist, or you have problem with cookies."
                 )
 
+class DotpayPaymentDone(TemplateView):
+    """ View for a customer after successful payment. """
+
+    template_name = "successful_payment_dotpay.html"
+
+
+
+
+
+""" Backstage Views """
 
 class PerformerLoginView(LoginView):
     authentication_form = CustomAuthenticationForm
