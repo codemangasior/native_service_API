@@ -326,7 +326,7 @@ class PriceAcceptedDotpay(TemplateView):
             url_secret_key = path.rsplit("/")[-2]
 
             # Setting stage on ACCEPTED
-            if data_dict['stage'] != STAGES.ACCEPTED:
+            if data_dict["stage"] != STAGES.ACCEPTED:
                 ProgressStages().accepted_stage(data=data_dict, secret_key=secret_key)
 
             # Secret_key authorization
@@ -336,6 +336,7 @@ class PriceAcceptedDotpay(TemplateView):
                 raise ValueError(
                     "SECRET_KEY does not exist, or you have problem with cookies."
                 )
+
 
 class DotpayPaymentDone(TemplateView):
     """ View for a customer after successful payment. """
@@ -351,14 +352,17 @@ class DotpayPaymentDone(TemplateView):
             data_dict = _get_data_from_models(secret_key)
 
             # Setting stage on PAYMENT_DONE
-            if data_dict['stage'] != STAGES.PAYMENT_DONE:
-                ProgressStages().payment_done_stage(data=data_dict, secret_key=secret_key)
+            if data_dict["stage"] != STAGES.PAYMENT_DONE:
+                ProgressStages().payment_done_stage(
+                    data=data_dict, secret_key=secret_key
+                )
 
             self.request.session.delete_test_cookie()
             return self.render_to_response(data_dict)
 
 
 """ Backstage Views """
+
 
 class PerformerLoginView(LoginView):
     authentication_form = CustomAuthenticationForm

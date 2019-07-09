@@ -1,4 +1,3 @@
-import os
 from django.conf import settings
 from django.utils.crypto import get_random_string
 from django.template.loader import render_to_string
@@ -26,23 +25,24 @@ class ProgressStages:
 
     @staticmethod
     def waiting_for_accept(data=None, url=None, secret_key=None):
-        EmailGenerator().customer_price_to_accept_html(data, url)
         post = NativePost.objects.get(secret_key=secret_key)
         post.stage = STAGES.WAITING_FOR_ACCEPT
         post.save()
+        EmailGenerator().customer_price_to_accept_html(data, url)
 
     @staticmethod
     def accepted_stage(data=None, secret_key=None):
-        EmailGenerator().performer_order_accepted_html(data)
         post = NativePost.objects.get(secret_key=secret_key)
         post.stage = STAGES.ACCEPTED
         post.save()
+        EmailGenerator().performer_order_accepted_html(data)
 
     @staticmethod
     def payment_done_stage(data=None, secret_key=None):
         post = NativePost.objects.get(secret_key=secret_key)
         post.stage = STAGES.PAYMENT_DONE
         post.save()
+        EmailGenerator.customer_payment_done_html(data)
 
     @staticmethod
     def in_progress_stage(secret_key=None):
@@ -156,5 +156,16 @@ class EmailGenerator:
         msg = EmailMultiAlternatives(
             subject, text_message, from_email, settings.PERFORMERS_LIST
         )
+        msg.attach_alternative(msg_html, "text/html")
+        msg.send()
+
+    @staticmethod
+    def customer_payment_done_html(data=None):
+        recipients_list = [data["email"]]
+        subject, from_email = "Płatność zrealizowana.", settings.SENDER
+        text_message = f"Płatność zrealizowana, czekaj na kolejne wiadomości."
+
+        msg_html = render_to_string("emails/customer_payment_done.html", data)
+        msg = EmailMultiAlternatives(subject, text_message, from_email, recipients_list)
         msg.attach_alternative(msg_html, "text/html")
         msg.send()
