@@ -215,7 +215,6 @@ class FileListView(LoginRequiredMixin, TemplateView):
         else:
             raise ValueError("SECRET_KEY does not exist.")
 
-    # todo login redirect view
     def get_login_url(self):
         return reverse_lazy("Native_Service:login")
 
@@ -313,7 +312,6 @@ class PriceAcceptedDotpay(TemplateView):
 
     template_name = "price_accepted_dotpay.html"
 
-    # todo email alert for performer about waiting for payment
     def get(self, request, *args, **kwargs):
         if self.request.session.test_cookie_worked():
             # Gets secret_key from session

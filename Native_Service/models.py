@@ -45,7 +45,6 @@ class NativePost(models.Model):
     modified = models.DateTimeField(auto_now=True)
     date_to_be_done = models.DateField()
     description = models.TextField(verbose_name="Opis zlecenia")
-    # todo model shows only one file when more of them are uploaded
     secret_key = models.CharField(max_length=45)
     slug = models.SlugField(unique=True)
     time_to_get_ready = models.DateField(
@@ -53,7 +52,6 @@ class NativePost(models.Model):
     )
     price = models.CharField(max_length=10, verbose_name="Cena", null=True)
     comments = models.TextField(verbose_name="Komentarz do zlecenia", null=True)
-    # todo increse lenght to 255
     file = models.CharField(null=True, blank=True, verbose_name="Plik", max_length=255)
     list_files = models.TextField(null=True, blank=True, verbose_name="Lista")
 
