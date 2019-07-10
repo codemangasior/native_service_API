@@ -47,6 +47,11 @@ urlpatterns = [
         views.DotpayPaymentDone.as_view(),
         name="dotpay_payment_done",
     ),
+    path(
+        "in_progress/<slug:slug>/",
+        views.OrderInProgress.as_view(),
+        name="order_in_progress",
+    ),
     re_path(
         r"^%s(?P<path>.*)$" % settings.MEDIA_URL[1:],
         protected_serve,

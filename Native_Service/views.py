@@ -351,14 +351,45 @@ class DotpayPaymentDone(TemplateView):
             # Function gets all data from all models with secret_key
             data_dict = _get_data_from_models(secret_key)
 
+            # Creates url for performer to set stage on 'in_progress'
+            url = UrlsGenerator.view_init_in_progress_order(secret_key)
+
             # Setting stage on PAYMENT_DONE
             if data_dict["stage"] != STAGES.PAYMENT_DONE:
                 ProgressStages().payment_done_stage(
-                    data=data_dict, secret_key=secret_key
+                    data=data_dict, secret_key=secret_key, url=url
                 )
 
             self.request.session.delete_test_cookie()
             return self.render_to_response(data_dict)
+        else:
+            raise PermissionError("Cookies Error.")
+
+
+class OrderInProgress(LoginRequiredMixin, TemplateView):
+    """ View for a performer that sets a stage on 'in_progress'. """
+
+    template_name = "order_in_progress.html"
+
+    def get(self, request, *args, **kwargs):
+
+        # Gets 'secret_key' from url
+        path = self.request.path
+        secret_key = path.rsplit("/")[-2]
+
+        # Function gets all data from all models with secret_key
+        data_dict = _get_data_from_models(secret_key)
+
+        # Setting stage on IN_PROGRESS
+        if data_dict["stage"] != STAGES.IN_PROGRESS:
+            ProgressStages().in_progress_stage(
+                data=data_dict, secret_key=secret_key
+            )
+
+        if secret_key == data_dict["secret_key"]:
+            return self.render_to_response(data_dict)
+        else:
+            raise ValueError("SECRET_KEY does not exist.")
 
 
 """ Backstage Views """
