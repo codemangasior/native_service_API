@@ -50,6 +50,7 @@ class ProgressStages:
         post = NativePost.objects.get(secret_key=secret_key)
         post.stage = STAGES.IN_PROGRESS
         post.save()
+        EmailGenerator.customer_order_in_progress_html(data)
 
     @staticmethod
     def done_stage(secret_key=None):
@@ -183,11 +184,20 @@ class EmailGenerator:
         subject, from_email = "Zlecenie opłacone!", settings.SENDER
         text_message = f"Użytkownik opłacił zlecenie! Zmień status na 'in_progress'."
 
-        msg_html = render_to_string(
-            "emails/performer_payment_done.html", data
-        )
+        msg_html = render_to_string("emails/performer_payment_done.html", data)
         msg = EmailMultiAlternatives(
             subject, text_message, from_email, settings.PERFORMERS_LIST
         )
+        msg.attach_alternative(msg_html, "text/html")
+        msg.send()
+
+    @staticmethod
+    def customer_order_in_progress_html(data=None):
+        recipients_list = [data["email"]]
+        subject, from_email = "Zlecenie w trakcie realizacji!.", settings.SENDER
+        text_message = f"Realizujemy zlecenie, czekaj na kolejne wiadomości."
+
+        msg_html = render_to_string("emails/customer_order_in_progress.html", data)
+        msg = EmailMultiAlternatives(subject, text_message, from_email, recipients_list)
         msg.attach_alternative(msg_html, "text/html")
         msg.send()

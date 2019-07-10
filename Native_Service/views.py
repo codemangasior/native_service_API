@@ -382,9 +382,7 @@ class OrderInProgress(LoginRequiredMixin, TemplateView):
 
         # Setting stage on IN_PROGRESS
         if data_dict["stage"] != STAGES.IN_PROGRESS:
-            ProgressStages().in_progress_stage(
-                data=data_dict, secret_key=secret_key
-            )
+            ProgressStages().in_progress_stage(data=data_dict, secret_key=secret_key)
 
         if secret_key == data_dict["secret_key"]:
             return self.render_to_response(data_dict)
