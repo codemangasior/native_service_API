@@ -111,7 +111,8 @@ class EmailGenerator:
 
     @staticmethod
     def performer_queue_alert_html(data=None, url=None):
-        data["url"] = url
+        now = datetime.datetime.now().strftime("%d-%m-%Y %H:%M")
+        data.update({"url": url, "now": now})
         subject, from_email = "Nowe zlecenie!", settings.SENDER
         text_message = f"Nowe zlecenie! {url}"
 
