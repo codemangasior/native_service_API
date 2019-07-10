@@ -28,7 +28,7 @@
 				<h1>Zlecenie:</h1>
 				<p>
 					<strong>Tytul:</strong> {{ title }}<br>
-					<strong>Podana data realizacji:</strong> {{ date_to_be_done }}<br>
+					<strong>Podana data realizacji:</strong> {{ date_to_be_done|date:"d.m.Y" }}<br>
 					<strong>Opis:</strong> {{ description }}<br>
 					<strong>Secret-key:</strong> {{ secret_key }}<br>
 				</p>
@@ -38,7 +38,7 @@
 				<h1>Warunki realizacji:</h1>
 				<p>
 					<strong>Tytul:</strong> {{ title }}<br>
-					<strong>Data realizacji:</strong> {{ time_to_get_ready }}<br>
+					<strong>Data realizacji:</strong> {{ time_to_get_ready|date:"d.m.Y" }}<br>
 					<strong>Komentarz:</strong> {{ comments }}<br>
 					<strong>Cena:</strong> {{ price }}<br>
 

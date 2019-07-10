@@ -24,14 +24,14 @@
 			Tytuł: {{ title }}<br>
 			SECRET_KEY: {{ secret_key }}<br>
 			Priorytet <strong>{{ priority }}</strong><br>
-			Dodano: {{ create }}<br>
-			Termin realizacji: {{ date_to_be_done }}<br>
+			Dodano: {{ create|date:"d.m.Y" }}<br>
+			Termin realizacji: {{ date_to_be_done|date:"d.m.Y" }}<br>
 			Opis: {{ description }}
 		</p>
 		<p style="font-size: 16px;font-weight: 300; line-height: 1.5;">
 			<strong>Warunki realizacji:</strong><br>
 			Cena: {{ price }} zł<br>
-			Termin realizacji: {{ time_to_get_ready }}<br>
+			Termin realizacji: {{ time_to_get_ready|date:"d.m.Y" }}<br>
 			Komentarz: {{ comments }}<br>
 		</p>
 		</div>

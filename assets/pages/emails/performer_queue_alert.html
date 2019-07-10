@@ -25,7 +25,7 @@
 			SECRET_KEY: {{ secret_key }}<br>
 			Priorytet <strong>{{ priority }}</strong><br>
 			Dodano: {{ now }}<br>
-			Termin realizacji: {{ date_to_be_done }}<br>
+			Termin realizacji: {{ date_to_be_done|date:"d.m.Y" }}<br>
 			Opis: {{ description }}
 		</p>
 		<p style="font-size: 16px;font-weight: 300; line-height: 1.5;">

@@ -19,13 +19,13 @@
 					Tytuł: {{ title }}<br>
 					SECRET_KEY: <strong>{{ secret_key }}</strong><br>
 					Priorytet <strong>{{ priority }}</strong><br>
-					Dodano: {{ create }}<br>
+					Dodano: {{ create|date:"d.m.Y" }} {{ create|time:"H:i" }}<br>
 					Opis: {{ description }}<br>
 				</p>
 				<p>
 					<strong>Warunki realizacji:</strong><br>
 						Cena: {{ price }} zł<br>
-						Termin realizacji (wycena): {{ time_to_get_ready }}<br>
+						Termin realizacji (wycena): {{ time_to_get_ready|date:"d.m.Y" }}<br>
 						Komentarz: {{ comments }}<br>
 				</p>
 			</div>
