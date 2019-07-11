@@ -58,6 +58,7 @@ urlpatterns = [
         views.RejectOrderSubmit.as_view(),
         name="reject_order_submit",
     ),
+    path("order_done/<slug:slug>/", views.OrderDone.as_view(), name="order_done"),
     re_path(
         r"^%s(?P<path>.*)$" % settings.MEDIA_URL[1:],
         protected_serve,

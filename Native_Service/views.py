@@ -220,7 +220,7 @@ class FileListView(LoginRequiredMixin, TemplateView):
         return reverse_lazy("Native_Service:login")
 
 
-class FinalPricing(UpdateView):
+class FinalPricing(LoginRequiredMixin, UpdateView):
     """ UpdateView for performer to set a price for customer. """
 
     model = NativePost
@@ -246,7 +246,7 @@ class FinalPricing(UpdateView):
         # Passing secret_key by session to other methods
         self.request.session["secret_key"] = secret_key
 
-        # Updates context #todo update method
+        # Updates context
         context.update(
             {"file_list_url": file_list_url, "reject_order_url": reject_order_url}
         )
@@ -257,8 +257,11 @@ class FinalPricing(UpdateView):
         else:
             raise ValueError("SECRET_KEY does not exist.")
 
+    def get_login_url(self):
+        return reverse_lazy("Native_Service:login")
 
-class FinalPricingSubmit(TemplateView):
+
+class FinalPricingSubmit(LoginRequiredMixin, TemplateView):
     """ Submit view for performer. """
 
     template_name = "final_pricing_submit.html"
@@ -286,6 +289,9 @@ class FinalPricingSubmit(TemplateView):
             return self.render_to_response(context)
         else:
             raise PermissionError("Cookies Error.")
+
+    def get_login_url(self):
+        return reverse_lazy("Native_Service:login")
 
 
 class PriceForCustomer(TemplateView):
@@ -384,9 +390,14 @@ class OrderInProgress(LoginRequiredMixin, TemplateView):
         # Function gets all data from all models with secret_key
         data_dict = _get_data_from_models(secret_key)
 
+        # Creates url for performer to set stage on 'done'
+        url = UrlsGenerator.view_done(secret_key)
+
         # Setting stage on IN_PROGRESS
         if data_dict["stage"] != STAGES.IN_PROGRESS:
-            ProgressStages().in_progress_stage(data=data_dict, secret_key=secret_key)
+            ProgressStages().in_progress_stage(
+                data=data_dict, secret_key=secret_key, url=url
+            )
 
         if secret_key == data_dict["secret_key"]:
             return self.render_to_response(data_dict)
@@ -397,7 +408,7 @@ class OrderInProgress(LoginRequiredMixin, TemplateView):
         return reverse_lazy("Native_Service:login")
 
 
-class RejectOrder(UpdateView):
+class RejectOrder(LoginRequiredMixin, UpdateView):
     """ View for the performer to reject an order. """
 
     model = NativePost
@@ -419,24 +430,62 @@ class RejectOrder(UpdateView):
             else:
                 raise PermissionError("Cookies and Secret_Key Error.")
 
+    def get_login_url(self):
+        return reverse_lazy("Native_Service:login")
 
-class RejectOrderSubmit(TemplateView):
+
+class RejectOrderSubmit(LoginRequiredMixin, TemplateView):
+    """ Submit view for the performer to reject an order. """
+
     template_name = "rejected_order_submit.html"
 
     def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
+        if self.request.session.test_cookie_worked:
+            context = self.get_context_data(**kwargs)
 
-        # Gets secret_key from session
-        secret_key = self.request.session["secret_key"]
+            # Gets secret_key from session
+            secret_key = self.request.session["secret_key"]
+
+            # Function gets all data from all models with secret_key
+            data_dict = _get_data_from_models(secret_key)
+
+            # Setting stage on REJECTED
+            if data_dict["stage"] != STAGES.REJECTED:
+                ProgressStages().order_rejected(data=data_dict, secret_key=secret_key)
+            self.request.session.delete_test_cookie()
+            return self.render_to_response(context)
+
+        else:
+            raise PermissionError("Cookies and Secret_Key Error.")
+
+    def get_login_url(self):
+        return reverse_lazy("Native_Service:login")
+
+
+class OrderDone(LoginRequiredMixin, TemplateView):
+    """ View for a performer that sets a stage on 'done'. """
+
+    template_name = "order_done.html"
+
+    def get(self, request, *args, **kwargs):
+
+        # Gets 'secret_key' from url
+        path = self.request.path
+        secret_key = path.rsplit("/")[-2]
 
         # Function gets all data from all models with secret_key
         data_dict = _get_data_from_models(secret_key)
 
-        # Setting stage on REJECTED
-        if data_dict["stage"] != STAGES.REJECTED:
-            ProgressStages().order_rejected(data=data_dict, secret_key=secret_key)
+        # Setting stage on DONE
+        if data_dict["stage"] != STAGES.DONE:
+            ProgressStages().done_stage(data=data_dict, secret_key=secret_key)
+        if secret_key == data_dict["secret_key"]:
+            return self.render_to_response(data_dict)
+        else:
+            raise PermissionError("Secret_Key Error.")
 
-        return self.render_to_response(context)
+    def get_login_url(self):
+        return reverse_lazy("Native_Service:login")
 
 
 """ Backstage Views """

@@ -54,14 +54,16 @@ class ProgressStages:
         EmailGenerator.performer_payment_done_html(data, url)
 
     @staticmethod
-    def in_progress_stage(data=None, secret_key=None):
+    def in_progress_stage(data=None, secret_key=None, url=None):
         post = NativePost.objects.get(secret_key=secret_key)
         post.stage = STAGES.IN_PROGRESS
         post.save()
         EmailGenerator.customer_order_in_progress_html(data)
+        EmailGenerator.performer_order_in_progress_html(data, url)
 
     @staticmethod
-    def done_stage(secret_key=None):
+    def done_stage(data=None, secret_key=None):
+        # todo new field with end datetime
         post = NativePost.objects.get(secret_key=secret_key)
         post.stage = STAGES.DONE
         post.save()
@@ -106,6 +108,11 @@ class UrlsGenerator:
     def view_reject_order(secret_key):
         """ Method generates url for performer to reject the order. """
         return f"{settings.HOST_URL}/reject_order/{secret_key}/"
+
+    @staticmethod
+    def view_done(secret_key):
+        """ Method generates url for performer to set stage on 'done'. """
+        return f"{settings.HOST_URL}/order_done/{secret_key}/"
 
     @staticmethod
     def list_files_urls_create(file_data, secret_key):
@@ -212,6 +219,19 @@ class EmailGenerator:
 
         msg_html = render_to_string("emails/customer_order_in_progress.html", data)
         msg = EmailMultiAlternatives(subject, text_message, from_email, recipients_list)
+        msg.attach_alternative(msg_html, "text/html")
+        msg.send()
+
+    @staticmethod
+    def performer_order_in_progress_html(data=None, url=None):
+        data["url"] = url
+        subject, from_email = "Zmieniono status zlecenia.", settings.SENDER
+        text_message = f"Zmieniłeś status na 'W TRAKCIE REALIZACJI'."
+
+        msg_html = render_to_string("emails/performer_order_in_progress.html", data)
+        msg = EmailMultiAlternatives(
+            subject, text_message, from_email, settings.PERFORMERS_LIST
+        )
         msg.attach_alternative(msg_html, "text/html")
         msg.send()
 
