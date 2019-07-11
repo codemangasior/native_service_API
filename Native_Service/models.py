@@ -21,6 +21,7 @@ class NativePost(models.Model):
         ("ZLECENIE OPŁACONE", "ZLECENIE OPŁACONE"),
         ("W TRAKCIE REALIZACJI", "W TRAKCIE REALIZACJI"),
         ("ZLECENIE ZAKOŃCZONE", "ZLECENIE ZAKOŃCZONE"),
+        ("ODRZUCONE", "ODRZUCONE"),
     ]
 
     category = models.CharField(
