@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}NativeService API - Wycena zlecenia{% endblock %}
+{% block title %}NativeService API - Odrzucenie zlecenia{% endblock %}
 {% block content %}
 
 
 	<div class="second bar">
-		<h1>Wypełnij formularz dotyczący zlecenia</h1>
+		<h1>Podaj powdów odrzucenia zlecenia</h1>
 		<p>
-			W razie potrzeby załącz nam niezbędne pliki.
+			Opisz problem jak najlepiej potrafisz.
 		</p>
 	</div>
 	<div class="body seventy">
@@ -58,13 +58,10 @@
 						<input type="submit" value="Wyślij">
 					</div>
 				</form>
-				<a href="{{ file_list_url }}" target="_blank">
-					<button class="btn">LISTA PLIKÓW</button>
-				</a><br>
 			</div>
 			<div class="step info">
 				<p>
-					Pamiętaj aby nikomu nie udostępniać danych, które właśnie widzisz.
+					Po wysłaniu odrzucenia, zlecenie zmieni status na <strong>ODRZUCONE</strong>.
 				</p>
 			</div>
 		</div>

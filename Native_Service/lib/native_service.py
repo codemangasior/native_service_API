@@ -16,6 +16,13 @@ class STAGES:
     REJECTED = "ODRZUCONE"
 
 
+class SecretKey:
+    @staticmethod
+    def create():
+        """ Method generates secret keys. """
+        return get_random_string(12)
+
+
 class ProgressStages:
     """ The basic logic of the email alert system and orders support. """
 
@@ -59,12 +66,12 @@ class ProgressStages:
         post.stage = STAGES.DONE
         post.save()
 
-
-class SecretKey:
     @staticmethod
-    def create():
-        """ Method generates secret keys. """
-        return get_random_string(12)
+    def order_rejected(data=None, secret_key=None):
+        EmailGenerator.customer_order_rejected(data)
+        post = NativePost.objects.get(secret_key=secret_key)
+        post.stage = STAGES.REJECTED
+        post.save()
 
 
 class UrlsGenerator:
@@ -94,6 +101,11 @@ class UrlsGenerator:
     def view_init_in_progress_order(secret_key):
         """ Method generates url for performer to set stage on 'in_progress'. """
         return f"{settings.HOST_URL}/in_progress/{secret_key}/"
+
+    @staticmethod
+    def view_reject_order(secret_key):
+        """ Method generates url for performer to reject the order. """
+        return f"{settings.HOST_URL}/reject_order/{secret_key}/"
 
     @staticmethod
     def list_files_urls_create(file_data, secret_key):
@@ -195,10 +207,21 @@ class EmailGenerator:
     @staticmethod
     def customer_order_in_progress_html(data=None):
         recipients_list = [data["email"]]
-        subject, from_email = "Zlecenie w trakcie realizacji!.", settings.SENDER
+        subject, from_email = "Zlecenie w trakcie realizacji.", settings.SENDER
         text_message = f"Realizujemy zlecenie, czekaj na kolejne wiadomości."
 
         msg_html = render_to_string("emails/customer_order_in_progress.html", data)
+        msg = EmailMultiAlternatives(subject, text_message, from_email, recipients_list)
+        msg.attach_alternative(msg_html, "text/html")
+        msg.send()
+
+    @staticmethod
+    def customer_order_rejected(data=None):
+        recipients_list = [data["email"]]
+        subject, from_email = "Zlecenie odrzucone.", settings.SENDER
+        text_message = f"Niestety Twoje zlecenie zostało odrzucone."
+
+        msg_html = render_to_string("emails/customer_order_rejected.html", data)
         msg = EmailMultiAlternatives(subject, text_message, from_email, recipients_list)
         msg.attach_alternative(msg_html, "text/html")
         msg.send()

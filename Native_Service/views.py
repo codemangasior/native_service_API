@@ -4,7 +4,7 @@ from django.conf import settings
 from django.views.generic import FormView
 from django.views.generic import TemplateView
 from django.views.generic import UpdateView
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.utils.crypto import get_random_string
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
@@ -15,6 +15,7 @@ from .forms import BusinessForm
 from .forms import OfficialForm
 from .forms import JobHomeCarForm
 from .forms import TranslatingForm
+from .forms import RejectOrderForm
 from .forms import CustomAuthenticationForm
 from Native_Service.lib.native_service import ProgressStages
 from Native_Service.lib.native_service import UrlsGenerator
@@ -223,7 +224,7 @@ class FinalPricing(UpdateView):
     """ UpdateView for performer to set a price for customer. """
 
     model = NativePost
-    template_name_suffix = "_update_form"
+    template_name_suffix = "_final_pricing"
     form_class = FinalPricingForm
     success_url = reverse_lazy("Native_Service:final_pricing_submit")
 
@@ -239,11 +240,16 @@ class FinalPricing(UpdateView):
         # Creates FileListView url
         file_list_url = UrlsGenerator().view_filelistview_url(secret_key)
 
+        # Creates RejectOrderView url
+        reject_order_url = UrlsGenerator().view_reject_order(secret_key)
+
         # Passing secret_key by session to other methods
         self.request.session["secret_key"] = secret_key
 
-        # Updates context
-        context["file_list_url"] = file_list_url
+        # Updates context #todo update method
+        context.update(
+            {"file_list_url": file_list_url, "reject_order_url": reject_order_url}
+        )
 
         # Render only if secret key exists in db
         if secret_key == _get_data_from_models(secret_key)["secret_key"]:
@@ -386,6 +392,51 @@ class OrderInProgress(LoginRequiredMixin, TemplateView):
             return self.render_to_response(data_dict)
         else:
             raise ValueError("SECRET_KEY does not exist.")
+
+    def get_login_url(self):
+        return reverse_lazy("Native_Service:login")
+
+
+class RejectOrder(UpdateView):
+    """ View for the performer to reject an order. """
+
+    model = NativePost
+    template_name_suffix = "_reject_order"
+    form_class = RejectOrderForm
+    success_url = reverse_lazy("Native_Service:reject_order_submit")
+
+    def get(self, request, *args, **kwargs):
+
+        if self.request.session.test_cookie_worked:
+            self.object = self.get_object()
+            context = self.get_context_data(object=self.object)
+
+            # Gets secret_key from session
+            secret_key = self.request.session["secret_key"]
+
+            if secret_key == _get_data_from_models(secret_key)["secret_key"]:
+                return self.render_to_response(context)
+            else:
+                raise PermissionError("Cookies and Secret_Key Error.")
+
+
+class RejectOrderSubmit(TemplateView):
+    template_name = "rejected_order_submit.html"
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+
+        # Gets secret_key from session
+        secret_key = self.request.session["secret_key"]
+
+        # Function gets all data from all models with secret_key
+        data_dict = _get_data_from_models(secret_key)
+
+        # Setting stage on REJECTED
+        if data_dict["stage"] != STAGES.REJECTED:
+            ProgressStages().order_rejected(data=data_dict, secret_key=secret_key)
+
+        return self.render_to_response(context)
 
 
 """ Backstage Views """

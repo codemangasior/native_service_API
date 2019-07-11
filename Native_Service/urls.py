@@ -52,6 +52,12 @@ urlpatterns = [
         views.OrderInProgress.as_view(),
         name="order_in_progress",
     ),
+    path("reject_order/<slug:slug>/", views.RejectOrder.as_view(), name="reject_order"),
+    path(
+        "reject_order_submit/",
+        views.RejectOrderSubmit.as_view(),
+        name="reject_order_submit",
+    ),
     re_path(
         r"^%s(?P<path>.*)$" % settings.MEDIA_URL[1:],
         protected_serve,

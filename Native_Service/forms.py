@@ -110,6 +110,19 @@ class FinalPricingForm(forms.ModelForm):
         fields = ("time_to_get_ready", "price", "comments", "secret_key")
 
 
+class RejectOrderForm(forms.ModelForm):
+    """ Performer form to reject order. """
+
+    comments = forms.CharField(
+        label="Przyczyna odrzucenia", max_length=500, widget=forms.Textarea
+    )
+    secret_key = forms.CharField(required=True, widget=forms.HiddenInput())
+
+    class Meta:
+        model = NativePost
+        fields = ("comments", "secret_key")
+
+
 class CustomAuthenticationForm(AuthenticationForm):
     username = UsernameField(
         label="Użytkownik", widget=forms.TextInput(attrs={"autofocus": True})
