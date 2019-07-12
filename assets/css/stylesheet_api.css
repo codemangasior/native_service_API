@@ -697,6 +697,11 @@ input[type=submit]:hover {
 	height: 100px;
 }
 
+#id_information {
+	width: 98%;
+	height: 100px;
+}
+
 
 #id_email {
 	width: 100%;

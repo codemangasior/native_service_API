@@ -58,3 +58,19 @@ class NativePost(models.Model):
 
     def __str__(self):
         return f"{self.name} {self.last_name} tel:{self.phone} key:{self.secret_key}"
+
+
+class NativeProduct(models.Model):
+    nativepost = models.ForeignKey(
+        NativePost,
+        on_delete=models.CASCADE,
+        related_name="product",
+        null=True,
+        blank=True,
+    )
+    information = models.TextField(
+        null=True, blank=True, verbose_name="Informacja końcowa"
+    )
+    attachments = models.CharField(
+        null=True, blank=True, verbose_name="Załączniki", max_length=255
+    )

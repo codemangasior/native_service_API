@@ -40,7 +40,7 @@
 					<strong>Tytul:</strong> {{ title }}<br>
 					<strong>Data realizacji:</strong> {{ time_to_get_ready|date:"d.m.Y" }}<br>
 					<strong>Komentarz:</strong> {{ comments }}<br>
-					<strong>Cena:</strong> {{ price }}<br>
+					<strong>Cena:</strong> {{ price }} zł<br>
 
 				</p>
 			</div>
@@ -51,7 +51,9 @@
 					Jednocześnie zostaniesz przekirowany do strony realizacji płatności.
 				</p>
 				<p>
-					<a href="{{ accept_url }}"><button class="btn">AKCEPTUJĘ WARUNKI I PŁACĘ</button> </a>
+					<a href="{{ accept_url }}">
+						<button class="btn">AKCEPTUJĘ WARUNKI I PŁACĘ</button>
+					</a>
 				</p>
 			</div>
 		</div>

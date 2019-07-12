@@ -1,4 +1,5 @@
 from .models import NativePost
+from .models import NativeProduct
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UsernameField
 
@@ -99,7 +100,7 @@ class FinalPricingForm(forms.ModelForm):
     time_to_get_ready = forms.DateField(
         widget=forms.SelectDateWidget(months=MONTHS), label="Data planowanej realizacji"
     )
-    price = forms.CharField(label="Cena", max_length=10)
+    price = forms.CharField(label="Cena [zł]", max_length=10)
     comments = forms.CharField(
         label="Uwagi do wyceny", max_length=500, widget=forms.Textarea
     )
@@ -128,3 +129,15 @@ class CustomAuthenticationForm(AuthenticationForm):
         label="Użytkownik", widget=forms.TextInput(attrs={"autofocus": True})
     )
     password = forms.CharField(label="Hasło", strip=False, widget=forms.PasswordInput)
+
+
+class ProductForm(forms.ModelForm):
+    attachments = forms.FileField(
+        label="Załączniki",
+        widget=forms.ClearableFileInput(attrs={"multiple": True}),
+        required=False,
+    )
+
+    class Meta:
+        model = NativeProduct
+        fields = ("information", "attachments")

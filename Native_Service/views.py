@@ -4,7 +4,7 @@ from django.conf import settings
 from django.views.generic import FormView
 from django.views.generic import TemplateView
 from django.views.generic import UpdateView
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse_lazy
 from django.utils.crypto import get_random_string
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
@@ -17,6 +17,7 @@ from .forms import JobHomeCarForm
 from .forms import TranslatingForm
 from .forms import RejectOrderForm
 from .forms import CustomAuthenticationForm
+from .forms import ProductForm
 from Native_Service.lib.native_service import ProgressStages
 from Native_Service.lib.native_service import UrlsGenerator
 from Native_Service.lib.native_service import SecretKey
@@ -462,27 +463,95 @@ class RejectOrderSubmit(LoginRequiredMixin, TemplateView):
         return reverse_lazy("Native_Service:login")
 
 
-class OrderDone(LoginRequiredMixin, TemplateView):
-    """ View for a performer that sets a stage on 'done'. """
+class OrderDone(LoginRequiredMixin, FormView):
+    """ View for a performer that sets a stage on 'done' and sent files to customer. """
 
     template_name = "order_done.html"
+    success_url = reverse_lazy("Native_Service:order_done_submit")
+    form_class = ProductForm
 
-    def get(self, request, *args, **kwargs):
+    def get_context_data(self, **kwargs):
 
         # Gets 'secret_key' from url
         path = self.request.path
         secret_key = path.rsplit("/")[-2]
 
         # Function gets all data from all models with secret_key
-        data_dict = _get_data_from_models(secret_key)
+        nativepost_data = _get_data_from_models(secret_key)
+
+        # Passing secret_key by session to other methods
+        self.request.session["secret_key"] = secret_key
+
+        kwargs.update(nativepost_data)
+
+        if "form" not in kwargs:
+            kwargs["form"] = self.get_form()
+        return super().get_context_data(**kwargs)
+
+    def form_valid(self, form):
+
+        # Gets secret_key from session
+        secret_key = self.request.session["secret_key"]
+
+        # Makes list of files
+        files = self.request.FILES.getlist("attachments")
+
+        # Function gets all data from all models with secret_key
+        nativepost_data = _get_data_from_models(secret_key)
+
+        # Getting current order object to use as foreign_key
+        current = NativePost.objects.get(secret_key=secret_key)
+
+        self.object = form.save(commit=False)
+        self.object.nativepost = current
+        self.object.save()
+
+        # Empty list for all files names
+        files_list = []
+
+        # Saves files to the path directory
+        path = settings.MEDIA_ROOT + f"uploads/products/{secret_key}/"
+
+        for f in files:
+            fs = FileSystemStorage(location=path)
+            file_name = str(f).replace(" ", "")
+            files_list.append(file_name)
+            fs.save(file_name, ContentFile(f.read()))
+
+        # Creates attachments list
+        attachment = [f"{path}/{name}" for name in files_list]
 
         # Setting stage on DONE
-        if data_dict["stage"] != STAGES.DONE:
-            ProgressStages().done_stage(data=data_dict, secret_key=secret_key)
-        if secret_key == data_dict["secret_key"]:
+        if nativepost_data["stage"] != STAGES.DONE:
+            ProgressStages.done_stage(
+                data=nativepost_data, secret_key=secret_key, attachment=attachment
+            )
+
+        self.request.session.set_test_cookie()
+        return super().form_valid(form)
+
+    def get_login_url(self):
+        return reverse_lazy("Native_Service:login")
+
+
+class OrderDoneSubmit(LoginRequiredMixin, TemplateView):
+    """ OrderDoneSubmit view for the performer. """
+
+    template_name = "order_done_submit.html"
+
+    def get(self, request, *args, **kwargs):
+        if self.request.session.test_cookie_worked:
+            # Gets secret_key from session
+            secret_key = self.request.session["secret_key"]
+
+            # Function gets all data from all models with secret_key
+            data_dict = _get_data_from_models(secret_key)
+
+            self.request.session.delete_test_cookie()
             return self.render_to_response(data_dict)
+
         else:
-            raise PermissionError("Secret_Key Error.")
+            raise PermissionError("Cookies and Secret_Key Error.")
 
     def get_login_url(self):
         return reverse_lazy("Native_Service:login")

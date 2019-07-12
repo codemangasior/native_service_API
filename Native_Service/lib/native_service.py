@@ -62,11 +62,12 @@ class ProgressStages:
         EmailGenerator.performer_order_in_progress_html(data, url)
 
     @staticmethod
-    def done_stage(data=None, secret_key=None):
+    def done_stage(data=None, secret_key=None, attachment=None):
         # todo new field with end datetime
         post = NativePost.objects.get(secret_key=secret_key)
         post.stage = STAGES.DONE
         post.save()
+        EmailGenerator().customer_order_done_with_files(data, attachment)
 
     @staticmethod
     def order_rejected(data=None, secret_key=None):
@@ -244,4 +245,17 @@ class EmailGenerator:
         msg_html = render_to_string("emails/customer_order_rejected.html", data)
         msg = EmailMultiAlternatives(subject, text_message, from_email, recipients_list)
         msg.attach_alternative(msg_html, "text/html")
+        msg.send()
+
+    @staticmethod
+    def customer_order_done_with_files(data=None, attachment=None):
+        recipients_list = [data["email"]]
+        subject, from_email = "Oto Twoje zrealizowane zlecenie.", settings.SENDER
+        text_message = f"Zrealizowane zlecenie z plikami."
+
+        msg_html = render_to_string("emails/customer_order_done.html", data)
+        msg = EmailMultiAlternatives(subject, text_message, from_email, recipients_list)
+        msg.attach_alternative(msg_html, "text/html")
+        for i in attachment:
+            msg.attach_file(i)
         msg.send()
