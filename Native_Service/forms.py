@@ -1,7 +1,8 @@
+from django import forms
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import UsernameField
 from .models import NativePost
 from .models import NativeProduct
-from django import forms
-from django.contrib.auth.forms import AuthenticationForm, UsernameField
 
 
 MONTHS = {
@@ -125,6 +126,8 @@ class RejectOrderForm(forms.ModelForm):
 
 
 class CustomAuthenticationForm(AuthenticationForm):
+    """ Overwritten Class to set labels. """
+
     username = UsernameField(
         label="Użytkownik", widget=forms.TextInput(attrs={"autofocus": True})
     )
@@ -132,6 +135,8 @@ class CustomAuthenticationForm(AuthenticationForm):
 
 
 class ProductForm(forms.ModelForm):
+    """ Form for performer to gives feedback and sending files. """
+
     attachments = forms.FileField(
         label="Załączniki",
         widget=forms.ClearableFileInput(attrs={"multiple": True}),

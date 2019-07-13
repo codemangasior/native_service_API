@@ -29,15 +29,8 @@ from urllib import parse
 from urllib import request
 
 
-"""
-def dispatch(self, request, *args, **kwargs):
-    breakpoint()
-    return super().dispatch(request, *args, **kwargs)
-"""
-
-
-def _get_data_from_models(secret_key):
-    """ Function returns all data filtered with secret_key as a dict."""
+def _get_data_from_nativepost(secret_key):
+    """ Function returns all data from native post filtered with secret_key."""
     data = NativePost.objects.filter(secret_key=secret_key)
 
     data_dict = {}
@@ -61,7 +54,7 @@ class Pricing(FormView):
     secret_key = None
     files = None
 
-    def get(self, request, *args, **kwargs):
+    def get(self, *args, **kwargs):
         """ Method generates secret_key in every request. """
         secret_key = SecretKey().create()
 
@@ -116,9 +109,9 @@ class Pricing(FormView):
                 fs.save(file_name, ContentFile(f.read()))
 
             # Creates custom url for performer
-            url = UrlsGenerator().view_finalpricing_url(secret_key)
+            url = UrlsGenerator().view_final_pricing(secret_key)
             # Initializing Progress Stages library
-            ProgressStages().in_queue_stage(data=form.cleaned_data, url=url)
+            ProgressStages().in_queue(data=form.cleaned_data, url=url)
             # Passing coded_files_list by session to other methods
             self.request.session["coded_files_list"] = coded_files_list
 
@@ -162,7 +155,7 @@ class SubmitPricing(TemplateView):
 
     template_name = "pricing_submit.html"
 
-    def get(self, request, *args, **kwargs):
+    def get(self, *args, **kwargs):
         """ Form data rendering in submit view. Protected by session. """
 
         if self.request.session.test_cookie_worked():
@@ -172,8 +165,8 @@ class SubmitPricing(TemplateView):
             # Gets coded_files_data from session
             coded_files_data = self.request.session["coded_files_list"]
 
-            # Function gets all data from all models with secret_key
-            data_dict = _get_data_from_models(secret_key)
+            # Function gets all data from nativepost models with secret_key
+            data_dict = _get_data_from_nativepost(secret_key)
 
             # coded_files_list >>> coding as JSON and saves in NativePost(current order) database
             json_coded = json.dumps(coded_files_data)
@@ -197,8 +190,8 @@ class FileListView(LoginRequiredMixin, TemplateView):
         path = self.request.path
         secret_key = path.rsplit("/")[-2]
 
-        # Function gets all data from all models with secret_key
-        context = _get_data_from_models(secret_key)
+        # Function gets all data from nativepost models with secret_key
+        context = _get_data_from_nativepost(secret_key)
         url_date = context["url_date"]
 
         # Decoding JSON file to python list back
@@ -206,13 +199,13 @@ class FileListView(LoginRequiredMixin, TemplateView):
         coded_files_list = jsondec.decode(context["list_files"])
 
         # Builds files urls list
-        performer_urls_list = UrlsGenerator().list_order_files_for_filelistview(
+        performer_urls_list = UrlsGenerator().list_order_files_for_file_list_view(
             secret_key=secret_key, coded_files_list=coded_files_list, url_date=url_date
         )
         context["performer_urls_list"] = performer_urls_list
 
         # Render only if secret key exists in db
-        if secret_key == _get_data_from_models(secret_key)["secret_key"]:
+        if secret_key == _get_data_from_nativepost(secret_key)["secret_key"]:
             return context
         else:
             raise ValueError("SECRET_KEY does not exist.")
@@ -229,17 +222,17 @@ class FinalPricing(LoginRequiredMixin, UpdateView):
     form_class = FinalPricingForm
     success_url = reverse_lazy("Native_Service:final_pricing_submit")
 
-    def get(self, request, *args, **kwargs):
+    def get(self, *args, **kwargs):
         self.request.session.set_test_cookie()
-        self.object = self.get_object()
-        context = self.get_context_data(object=self.object)
+        _object = self.get_object()
+        context = self.get_context_data(object=_object)
 
         # Gets 'secret_key' from url
         path = self.request.path
         secret_key = path.rsplit("/")[-2]
 
         # Creates FileListView url
-        file_list_url = UrlsGenerator().view_filelistview_url(secret_key)
+        file_list_url = UrlsGenerator().view_file_list_view(secret_key)
 
         # Creates RejectOrderView url
         reject_order_url = UrlsGenerator().view_reject_order(secret_key)
@@ -253,7 +246,7 @@ class FinalPricing(LoginRequiredMixin, UpdateView):
         )
 
         # Render only if secret key exists in db
-        if secret_key == _get_data_from_models(secret_key)["secret_key"]:
+        if secret_key == _get_data_from_nativepost(secret_key)["secret_key"]:
             return self.render_to_response(context)
         else:
             raise ValueError("SECRET_KEY does not exist.")
@@ -267,20 +260,20 @@ class FinalPricingSubmit(LoginRequiredMixin, TemplateView):
 
     template_name = "final_pricing_submit.html"
 
-    def get(self, request, *args, **kwargs):
+    def get(self, *args, **kwargs):
         if self.request.session.test_cookie_worked:
 
             # Gets secret_key from session
             secret_key = self.request.session["secret_key"]
 
-            # Function gets all data from all models with secret_key
-            data_dict = _get_data_from_models(secret_key)
+            # Function gets all data from nativepost models with secret_key
+            data_dict = _get_data_from_nativepost(secret_key)
 
             # Creates url for customer to see price
-            email_url = UrlsGenerator().view_priceforcustomer_url(secret_key)
+            email_url = UrlsGenerator().view_price_for_customer(secret_key)
 
             # Setting stage on WAITING_FOR_ACCEPT
-            if data_dict["stage"] != STAGES.WAITING_FOR_ACCEPT:
+            if data_dict["stage"] == STAGES.IN_QUEUE:
                 ProgressStages().waiting_for_accept(
                     data=data_dict, url=email_url, secret_key=secret_key
                 )
@@ -300,7 +293,7 @@ class PriceForCustomer(TemplateView):
 
     template_name = "price_for_you.html"
 
-    def get(self, request, *args, **kwargs):
+    def get(self, *args, **kwargs):
         self.request.session.set_test_cookie()
 
         # Gets 'secret_key' from url
@@ -310,11 +303,11 @@ class PriceForCustomer(TemplateView):
         # Passing secret key with session to next view
         self.request.session["secret_key"] = secret_key
 
-        # Function gets all data from all models with secret_key
-        data_dict = _get_data_from_models(secret_key)
+        # Function gets all data from nativepost models with secret_key
+        data_dict = _get_data_from_nativepost(secret_key)
 
         # Creates url which gives possibility to accept price by customer
-        price_accept_url = UrlsGenerator().view_priceaccepteddotpay_url(secret_key)
+        price_accept_url = UrlsGenerator().view_price_accepted_dotpay(secret_key)
         data_dict.update({"accept_url": price_accept_url})
 
         return self.render_to_response(data_dict)
@@ -325,20 +318,22 @@ class PriceAcceptedDotpay(TemplateView):
 
     template_name = "price_accepted_dotpay.html"
 
-    def get(self, request, *args, **kwargs):
+    def get(self, *args, **kwargs):
         if self.request.session.test_cookie_worked():
+
             # Gets secret_key from session
             secret_key = self.request.session["secret_key"]
-            # Function gets all data from all models with secret_key
-            data_dict = _get_data_from_models(secret_key)
+
+            # Function gets all data from nativepost models with secret_key
+            data_dict = _get_data_from_nativepost(secret_key)
 
             # Gets 'secret_key' from url
             path = self.request.path
             url_secret_key = path.rsplit("/")[-2]
 
             # Setting stage on ACCEPTED
-            if data_dict["stage"] != STAGES.ACCEPTED:
-                ProgressStages().accepted_stage(data=data_dict, secret_key=secret_key)
+            if data_dict["stage"] == STAGES.WAITING_FOR_ACCEPT:
+                ProgressStages().accepted(data=data_dict, secret_key=secret_key)
 
             # Secret_key authorization
             if secret_key == url_secret_key:
@@ -354,20 +349,21 @@ class DotpayPaymentDone(TemplateView):
 
     template_name = "successful_payment_dotpay.html"
 
-    def get(self, request, *args, **kwargs):
+    def get(self, *args, **kwargs):
         if self.request.session.test_cookie_worked():
 
             # Gets secret_key from session
             secret_key = self.request.session["secret_key"]
-            # Function gets all data from all models with secret_key
-            data_dict = _get_data_from_models(secret_key)
+
+            # Function gets all data from nativepost models with secret_key
+            data_dict = _get_data_from_nativepost(secret_key)
 
             # Creates url for performer to set stage on 'in_progress'
-            url = UrlsGenerator.view_init_in_progress_order(secret_key)
+            url = UrlsGenerator.view_order_in_progress(secret_key)
 
             # Setting stage on PAYMENT_DONE
-            if data_dict["stage"] != STAGES.PAYMENT_DONE:
-                ProgressStages().payment_done_stage(
+            if data_dict["stage"] == STAGES.ACCEPTED:
+                ProgressStages().payment_done(
                     data=data_dict, secret_key=secret_key, url=url
                 )
 
@@ -382,23 +378,21 @@ class OrderInProgress(LoginRequiredMixin, TemplateView):
 
     template_name = "order_in_progress.html"
 
-    def get(self, request, *args, **kwargs):
+    def get(self, *args, **kwargs):
 
         # Gets 'secret_key' from url
         path = self.request.path
         secret_key = path.rsplit("/")[-2]
 
-        # Function gets all data from all models with secret_key
-        data_dict = _get_data_from_models(secret_key)
+        # Function gets all data from nativepost models with secret_key
+        data_dict = _get_data_from_nativepost(secret_key)
 
         # Creates url for performer to set stage on 'done'
         url = UrlsGenerator.view_done(secret_key)
 
         # Setting stage on IN_PROGRESS
-        if data_dict["stage"] != STAGES.IN_PROGRESS:
-            ProgressStages().in_progress_stage(
-                data=data_dict, secret_key=secret_key, url=url
-            )
+        if data_dict["stage"] == STAGES.PAYMENT_DONE:
+            ProgressStages().in_progress(data=data_dict, secret_key=secret_key, url=url)
 
         if secret_key == data_dict["secret_key"]:
             return self.render_to_response(data_dict)
@@ -417,16 +411,16 @@ class RejectOrder(LoginRequiredMixin, UpdateView):
     form_class = RejectOrderForm
     success_url = reverse_lazy("Native_Service:reject_order_submit")
 
-    def get(self, request, *args, **kwargs):
+    def get(self, *args, **kwargs):
 
         if self.request.session.test_cookie_worked:
-            self.object = self.get_object()
-            context = self.get_context_data(object=self.object)
+            _object = self.get_object()
+            context = self.get_context_data(object=_object)
 
             # Gets secret_key from session
             secret_key = self.request.session["secret_key"]
 
-            if secret_key == _get_data_from_models(secret_key)["secret_key"]:
+            if secret_key == _get_data_from_nativepost(secret_key)["secret_key"]:
                 return self.render_to_response(context)
             else:
                 raise PermissionError("Cookies and Secret_Key Error.")
@@ -440,15 +434,15 @@ class RejectOrderSubmit(LoginRequiredMixin, TemplateView):
 
     template_name = "rejected_order_submit.html"
 
-    def get(self, request, *args, **kwargs):
+    def get(self, *args, **kwargs):
         if self.request.session.test_cookie_worked:
             context = self.get_context_data(**kwargs)
 
             # Gets secret_key from session
             secret_key = self.request.session["secret_key"]
 
-            # Function gets all data from all models with secret_key
-            data_dict = _get_data_from_models(secret_key)
+            # Function gets all data from nativepost models with secret_key
+            data_dict = _get_data_from_nativepost(secret_key)
 
             # Setting stage on REJECTED
             if data_dict["stage"] != STAGES.REJECTED:
@@ -476,8 +470,8 @@ class OrderDone(LoginRequiredMixin, FormView):
         path = self.request.path
         secret_key = path.rsplit("/")[-2]
 
-        # Function gets all data from all models with secret_key
-        nativepost_data = _get_data_from_models(secret_key)
+        # Function gets all data from nativepost models with secret_key
+        nativepost_data = _get_data_from_nativepost(secret_key)
 
         # Passing secret_key by session to other methods
         self.request.session["secret_key"] = secret_key
@@ -496,8 +490,8 @@ class OrderDone(LoginRequiredMixin, FormView):
         # Makes list of files
         files = self.request.FILES.getlist("attachments")
 
-        # Function gets all data from all models with secret_key
-        nativepost_data = _get_data_from_models(secret_key)
+        # Function gets all data from nativepost models with secret_key
+        nativepost_data = _get_data_from_nativepost(secret_key)
 
         # Getting current order object to use as foreign_key
         current = NativePost.objects.get(secret_key=secret_key)
@@ -518,12 +512,12 @@ class OrderDone(LoginRequiredMixin, FormView):
             files_list.append(file_name)
             fs.save(file_name, ContentFile(f.read()))
 
-        # Creates attachments list
+        # Creates attachments list for email
         attachment = [f"{path}/{name}" for name in files_list]
 
         # Setting stage on DONE
         if nativepost_data["stage"] != STAGES.DONE:
-            ProgressStages.done_stage(
+            ProgressStages.done(
                 data=nativepost_data, secret_key=secret_key, attachment=attachment
             )
 
@@ -539,13 +533,13 @@ class OrderDoneSubmit(LoginRequiredMixin, TemplateView):
 
     template_name = "order_done_submit.html"
 
-    def get(self, request, *args, **kwargs):
+    def get(self, *args, **kwargs):
         if self.request.session.test_cookie_worked:
             # Gets secret_key from session
             secret_key = self.request.session["secret_key"]
 
-            # Function gets all data from all models with secret_key
-            data_dict = _get_data_from_models(secret_key)
+            # Function gets all data from nativepost models with secret_key
+            data_dict = _get_data_from_nativepost(secret_key)
 
             self.request.session.delete_test_cookie()
             return self.render_to_response(data_dict)

@@ -10,11 +10,11 @@
 	<link href="https://fonts.googleapis.com/css?family=Baloo+Thambi|Mukta|Oswald|Pacifico&display=swap" rel="stylesheet">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="Description" content="polish - german translation company with self API.">
+	<link rel="stylesheet" href="{% static "JS/nativescript.js" %}">
 </head>
-
-<body>
+<body onload="change_slide()">
 <!-- navbar -->
-<nav>
+<nav id="navbar">
 	<div class="row">
 		<div class="toggle menu">
 			<div class="toggle menu content">
@@ -84,6 +84,7 @@
         })
     })
 </script>
+<script src="{% static "JS/nativescript.js" %}"></script>
 </body>
 
 </html>

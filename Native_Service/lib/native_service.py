@@ -1,18 +1,18 @@
 from django.conf import settings
-from django.utils.crypto import get_random_string
-from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
-import datetime
+from django.template.loader import render_to_string
+from django.utils.crypto import get_random_string
 from Native_Service.models import NativePost
+import datetime
 
 
 class STAGES:
     IN_QUEUE = "W KOLEJCE"
     WAITING_FOR_ACCEPT = "OCZEKIWANIE NA AKCEPTACJĘ"
-    ACCEPTED = "ZLECENIE ZAAKCEPTOWANE"
-    PAYMENT_DONE = "ZLECENIE OPŁACONE"
+    ACCEPTED = "ZAAKCEPTOWANE"
+    PAYMENT_DONE = "OPŁACONE"
     IN_PROGRESS = "W TRAKCIE REALIZACJI"
-    DONE = "ZLECENIE ZAKOŃCZONE"
+    DONE = "ZAKOŃCZONE"
     REJECTED = "ODRZUCONE"
 
 
@@ -27,7 +27,7 @@ class ProgressStages:
     """ The basic logic of the email alert system and orders support. """
 
     @staticmethod
-    def in_queue_stage(data=None, url=None):
+    def in_queue(data=None, url=None):
         EmailGenerator().customer_queue_alert_html(data)
         EmailGenerator().performer_queue_alert_html(data, url)
 
@@ -39,14 +39,14 @@ class ProgressStages:
         EmailGenerator().customer_price_to_accept_html(data, url)
 
     @staticmethod
-    def accepted_stage(data=None, secret_key=None):
+    def accepted(data=None, secret_key=None):
         post = NativePost.objects.get(secret_key=secret_key)
         post.stage = STAGES.ACCEPTED
         post.save()
         EmailGenerator().performer_order_accepted_html(data)
 
     @staticmethod
-    def payment_done_stage(data=None, secret_key=None, url=None):
+    def payment_done(data=None, secret_key=None, url=None):
         post = NativePost.objects.get(secret_key=secret_key)
         post.stage = STAGES.PAYMENT_DONE
         post.save()
@@ -54,7 +54,7 @@ class ProgressStages:
         EmailGenerator.performer_payment_done_html(data, url)
 
     @staticmethod
-    def in_progress_stage(data=None, secret_key=None, url=None):
+    def in_progress(data=None, secret_key=None, url=None):
         post = NativePost.objects.get(secret_key=secret_key)
         post.stage = STAGES.IN_PROGRESS
         post.save()
@@ -62,7 +62,7 @@ class ProgressStages:
         EmailGenerator.performer_order_in_progress_html(data, url)
 
     @staticmethod
-    def done_stage(data=None, secret_key=None, attachment=None):
+    def done(data=None, secret_key=None, attachment=None):
         # todo new field with end datetime
         post = NativePost.objects.get(secret_key=secret_key)
         post.stage = STAGES.DONE
@@ -81,27 +81,27 @@ class UrlsGenerator:
     """ The class contains all methods generating URL's"""
 
     @staticmethod
-    def view_finalpricing_url(secret_key):
+    def view_final_pricing(secret_key):
         """ Method generates url for performer to make some price. """
         return f"{settings.HOST_URL}/final_pricing/{secret_key}/"
 
     @staticmethod
-    def view_priceforcustomer_url(secret_key):
+    def view_price_for_customer(secret_key):
         """ Method generates url for customer to see price. """
         return f"{settings.HOST_URL}/price_for_you/{secret_key}/"
 
     @staticmethod
-    def view_priceaccepteddotpay_url(secret_key):
+    def view_price_accepted_dotpay(secret_key):
         """ Method generates url for customer for price accept. """
         return f"{settings.HOST_URL}/price_accepted/{secret_key}/"
 
     @staticmethod
-    def view_filelistview_url(secret_key):
+    def view_file_list_view(secret_key):
         """ Method generates url for performer to see list of files. """
         return f"{settings.HOST_URL}/file_list/{secret_key}/"
 
     @staticmethod
-    def view_init_in_progress_order(secret_key):
+    def view_order_in_progress(secret_key):
         """ Method generates url for performer to set stage on 'in_progress'. """
         return f"{settings.HOST_URL}/in_progress/{secret_key}/"
 
@@ -116,17 +116,7 @@ class UrlsGenerator:
         return f"{settings.HOST_URL}/order_done/{secret_key}/"
 
     @staticmethod
-    def list_files_urls_create(file_data, secret_key):
-        """ Method generates uploaded file list. """
-        return [
-            f"{settings.HOST_URL}{settings.MEDIA_URL}uploads/{datetime.date.today()}/{secret_key}/{f}\n".replace(
-                " ", ""
-            )
-            for f in file_data
-        ]
-
-    @staticmethod
-    def list_order_files_for_filelistview(secret_key, coded_files_list, url_date):
+    def list_order_files_for_file_list_view(secret_key, coded_files_list, url_date):
         """ Method generates url for performer to take look at file list. """
         return [
             f"{settings.HOST_URL}/media/uploads/{url_date}/{secret_key}/{f}"

@@ -10,11 +10,13 @@ body {
 	height: 100%;
 
 }
-
 /* navbar */
 nav {
 	width: 100%;
 	background-color: #060c21;
+	z-index: 10000;
+	position: fixed;
+	top: 0px;
 }
 
 ul {
@@ -47,6 +49,8 @@ ul li a {
 	color: #fff;
 	font-size: 30px;
 	display: none;
+	z-index: 10000;
+	top: 0px;
 }
 
 .toggle.menu.content {
@@ -77,6 +81,7 @@ ul li a {
 }
 
 .toggle.menu.content.img {
+	padding-top: 30px;
 	position: absolute;
 	display: inline-block;
 	right: 0%;
@@ -245,7 +250,7 @@ ul li a {
 	top: 0;
 	right: 0;
 	left: 0;
-
+	padding-top: 70px;
 }
 
 /* body content 80% */
@@ -612,6 +617,7 @@ ul li a {
 	}
 
 	.info.mobile {
+		margin-top: 15px;
 		display: block;
 		width: auto;
 		min-height: auto;
