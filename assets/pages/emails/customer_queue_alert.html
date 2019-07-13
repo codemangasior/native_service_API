@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Email</title>
+</head>
+<body>
+
+<div class="email-background" style="background: #eee;padding: 10px;">
+
+	<div class="pre-header" style="background: #eee;color: #eee;font-size: 5px;">
+		Twoje zlecenie wyceny w NativeService oczekuje w kolejce!
+	</div>
+	<div class="email-container"
+			 style="max-width: 500px;background-image: linear-gradient(to bottom, hsl(348, 100%, 61%), hsl(198, 1%, 88%));margin: 0 auto;font-family: sans-serif;overflow: hidden;border-radius: 5px; color: black">
+		<div class="center-content" style="text-align: center;">
+			<img src="https://nativeservice.pl/static/images/logo.webp" alt="logo"
+					 style="max-width: 100%;border-radius: 5px;">
+			<h1>Zlecenie wyceny</h1>
+
+			<p style="margin: 20px;font-size: 16px;font-weight: 300;text-align: center;line-height: 1.5;">Twój klucz do
+				realizacji zlecenia to: <strong>{{ secret_key }}</strong>.<br>
+				Pamiętaj aby nikomu go nie udostępniać! Od tego zależy bezpieczeństwo Twoich danych.
+			</p>
+			<p style="margin: 20px; font-size: 16px;font-weight: 300; line-height: 1.5;">
+				Twoje zlecenie:<br> <strong>{{ title }}</strong><br>oczekuje w kolejce.<br>
+			</p>
+		</div>
+		<p style="margin: 20px;font-size: 16px;font-weight: 300;text-align: center;line-height: 1.5;">
+			Wyceny zleceń wysłanych w godzinach 8:00 - 20:00 realizujemy w ciągu 15 minut!<br>
+			Jeśli masz problem z naszymi usługami skontaktuj się z działem technicznym.
+		</p>
+
+		<div class="cta" style="text-align: center;margin: 20px;">
+			<a href="https://nativeservice.pl/contact"
+				 style="text-decoration: none;display: inline-block;background: #001f44;color: white;padding: 10px;border-radius: 5px;">KONTAKT</a>
+		</div>
+	</div>
+	<div class="footer-junk" style="text-align: center;background: none;padding: 20px;font-size: 12px;">
+		<a href="https://nativeservice.pl/">nativeservice.pl</a>
+	</div>
+</div>
+</body>
+</html>

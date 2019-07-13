@@ -1,5 +1,8 @@
 from django import forms
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import UsernameField
 from .models import NativePost
+from .models import NativeProduct
 
 
 MONTHS = {
@@ -29,6 +32,8 @@ class PricingForm(forms.ModelForm):
     description = forms.CharField(
         label="Opis zlecenia", max_length=1000, widget=forms.Textarea
     )
+    # todo validation for doc, docx, pdf, txt, png, jpeg, jpg, webp
+    # todo set size limits
     file = forms.FileField(
         label="Plik",
         widget=forms.ClearableFileInput(attrs={"multiple": True}),
@@ -36,6 +41,7 @@ class PricingForm(forms.ModelForm):
     )
     secret_key = forms.CharField(required=True, widget=forms.HiddenInput())
     slug = forms.CharField(required=True, widget=forms.HiddenInput())
+    stage = forms.CharField(initial="W KOLEJCE", widget=forms.HiddenInput())
 
     class Meta:
         model = NativePost
@@ -53,6 +59,7 @@ class PricingForm(forms.ModelForm):
             "secret_key",
             "slug",
             "file",
+            "stage",
         )
 
 
@@ -94,7 +101,7 @@ class FinalPricingForm(forms.ModelForm):
     time_to_get_ready = forms.DateField(
         widget=forms.SelectDateWidget(months=MONTHS), label="Data planowanej realizacji"
     )
-    price = forms.CharField(label="Cena", max_length=10)
+    price = forms.CharField(label="Cena [zł]", max_length=10)
     comments = forms.CharField(
         label="Uwagi do wyceny", max_length=500, widget=forms.Textarea
     )
@@ -103,3 +110,39 @@ class FinalPricingForm(forms.ModelForm):
     class Meta:
         model = NativePost
         fields = ("time_to_get_ready", "price", "comments", "secret_key")
+
+
+class RejectOrderForm(forms.ModelForm):
+    """ Performer form to reject order. """
+
+    comments = forms.CharField(
+        label="Przyczyna odrzucenia", max_length=500, widget=forms.Textarea
+    )
+    secret_key = forms.CharField(required=True, widget=forms.HiddenInput())
+
+    class Meta:
+        model = NativePost
+        fields = ("comments", "secret_key")
+
+
+class CustomAuthenticationForm(AuthenticationForm):
+    """ Overwritten Class to set labels. """
+
+    username = UsernameField(
+        label="Użytkownik", widget=forms.TextInput(attrs={"autofocus": True})
+    )
+    password = forms.CharField(label="Hasło", strip=False, widget=forms.PasswordInput)
+
+
+class ProductForm(forms.ModelForm):
+    """ Form for performer to gives feedback and sending files. """
+
+    attachments = forms.FileField(
+        label="Załączniki",
+        widget=forms.ClearableFileInput(attrs={"multiple": True}),
+        required=False,
+    )
+
+    class Meta:
+        model = NativeProduct
+        fields = ("information", "attachments")

@@ -1,60 +1,62 @@
-{% extends "base.html" %} 
+{% extends "base.html" %}
 {% block title %}NativeService API - Potwierdź warunki wyceny{% endblock %}
 {% block content %}
-{% load static %}
-<div class="second bar">
-    <h1>
-		Potwierdź warunki realizacji zlecenia.
-	</h1>
-    <p>
-        Po zapoznaniu się z warunkami, aby przejść do płatności, kliknij poniższy link.
-    </p>
-</div>
-<div class="body seventy">
-    <!-- container -->
-    <div class="stepbystep price">
-								<div class="box price">
+	{% load static %}
+	<div class="second bar">
+		<h1>
+			Potwierdź warunki realizacji zlecenia.
+		</h1>
+		<p>
+			Po zapoznaniu się z warunkami, aby przejść do płatności, kliknij poniższy link.
+		</p>
+	</div>
+	<div class="body seventy">
+		<!-- container -->
+		<div class="stepbystep price">
+			<div class="box price">
 
-					<h1>Twoje dane:</h1>
-            <p>
-								<strong>Imię:</strong> {{ name }}<br>
-								<strong>Nazwisko:</strong> {{ last_name }}<br>
-								<strong>Email:</strong> {{ email }}<br>
-								<strong>Telefon:</strong> {{ phone }}<br>
-            </p>
-								</div>
-					<div class="box price">
+				<h1>Twoje dane:</h1>
+				<p>
+					<strong>Imię:</strong> {{ name }}<br>
+					<strong>Nazwisko:</strong> {{ last_name }}<br>
+					<strong>Email:</strong> {{ email }}<br>
+					<strong>Telefon:</strong> {{ phone }}<br>
+				</p>
+			</div>
+			<div class="box price">
 
-					<h1>Zlecenie:</h1>
-            <p>
-								<strong>Tytul:</strong> {{ title }}<br>
-								<strong>Podana data realizacji:</strong> {{ date_to_be_done }}<br>
-								<strong>Opis:</strong> {{ description }}<br>
-								<strong>Secret-key:</strong> {{ secret_key }}<br>
-            </p>
-					</div>
-								<div class="box price">
+				<h1>Zlecenie:</h1>
+				<p>
+					<strong>Tytul:</strong> {{ title }}<br>
+					<strong>Podana data realizacji:</strong> {{ date_to_be_done|date:"d.m.Y" }}<br>
+					<strong>Opis:</strong> {{ description }}<br>
+					<strong>Secret-key:</strong> {{ secret_key }}<br>
+				</p>
+			</div>
+			<div class="box price">
 
-					<h1>Warunki realizacji:</h1>
-            <p>
-							<strong>Tytul:</strong> {{ title }}<br>
-							<strong>Data realizacji:</strong> {{ time_to_get_ready }}<br>
-							<strong>Komentarz:</strong> {{ comments }}<br>
-							<strong>Cena:</strong> {{ price }}<br>
+				<h1>Warunki realizacji:</h1>
+				<p>
+					<strong>Tytul:</strong> {{ title }}<br>
+					<strong>Data realizacji:</strong> {{ time_to_get_ready|date:"d.m.Y" }}<br>
+					<strong>Komentarz:</strong> {{ comments }}<br>
+					<strong>Cena:</strong> {{ price }} zł<br>
 
-            </p>
-								</div>
-					<div class="box price">
-					<h1>Akceptuj warunki zlecenia:</h1>
-            <p>
-							Klikając w link poniżej akceptujesz nasz regulamin oraz warunki realizacji zlecenia.
-							Jednocześnie zostaniesz przekirowany do strony realizacji płatności.
-            </p>
-						<p>
-							<a href="{{ accept_url }}">{{ accept_url }}</a>
-						</p>
-					</div>
+				</p>
+			</div>
+			<div class="box price">
+				<h1>Akceptuj warunki zlecenia:</h1>
+				<p>
+					Klikając w przycisk poniżej akceptujesz nasz regulamin, politykę prywatności oraz warunki realizacji zlecenia.
+					Jednocześnie zostaniesz przekirowany do strony realizacji płatności.
+				</p>
+				<p>
+					<a href="{{ accept_url }}">
+						<button class="btn">AKCEPTUJĘ WARUNKI I PŁACĘ</button>
+					</a>
+				</p>
+			</div>
 		</div>
-				</div>
+	</div>
 
 {% endblock %}

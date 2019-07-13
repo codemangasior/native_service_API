@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}NativeService API - Test{% endblock %}
+{% block title %}NativeService API - Wycena{% endblock %}
 {% block content %}
 
 
 	<div class="second bar">
-		<h1>Wypełnij formularz dotyczący zlecenia - kategoria: TŁUMACZENIA</h1>
+		<h1>Wypełnij formularz dotyczący zlecenia</h1>
 		<p>
 			W razie potrzeby załącz nam niezbędne pliki.
 		</p>
@@ -14,8 +14,25 @@
 		<!-- container -->
 		<div class="stepbystep">
 			<div class="container">
+				<div class="box price">
+					<p>
+						<strong>Dane dotyczące zlecenia</strong>:<br>
+						Tytuł: {{ title }}<br>
+						SECRET_KEY: <strong>{{ secret_key }}</strong><br>
+						Priorytet <strong>{{ priority }}</strong><br>
+						Dodano: {{ create|date:"d.m.Y" }} {{ create|time:"H:i" }}<br>
+						Opis: {{ description }}<br>
+					</p>
+					<p>
+						<strong>Warunki realizacji:</strong><br>
+						Cena: {{ price }} zł<br>
+						Termin realizacji (wycena): {{ time_to_get_ready|date:"d.m.Y" }}<br>
+						Komentarz: {{ comments }}<br>
+					</p>
+				</div>
 				<form method="POST" enctype="multipart/form-data">
 					{% csrf_token %}
+					{{ native_formset }}
 					{% load widget_tweaks %}
 
 					{% for hidden_field in form.hidden_fields %}
@@ -54,28 +71,19 @@
 							{% endif %}
 						</div>
 					{% endfor %}
+					{{ uploaded_formset }}
+
 					<p>
-						Wysyłając formularz wyrażasz zgodę na przetwarzanie Twoich danych osobowych na potrzeby realizacji
-						przedmiotowego zlecenia, zgodnie z art. 6 ust. 1 lit. a Rozporządzenia Parlamentu Europejskiego i Rady
-						(UE) 2016/679 z dnia 27 kwietnia 2016 r. w sprawie ochrony osób fizycznych w związku z przetwarzaniem danych
-						osobowych i w sprawie swobodnego przepływu takich danych oraz uchylenia dyrektywy 95/46/WE
-						(ogólne rozporządzenie o ochronie danych)
+						Wysyłając formularz zmienisz status na <strong>ZLECENIE ZAKOŃCZONE</strong>
 					</p>
-					<div class="re">
-						<script src='https://www.google.com/recaptcha/api.js'></script>
-						<div class="g-recaptcha" data-sitekey="6Lcxb6wUAAAAAMZnGj8jw4DcWszUXmm9-S3VHmZU"></div>
-					</div>
+
 					<div class="holderbutton">
 						<input type="submit" value="Wyślij">
 					</div>
 				</form>
 			</div>
 			<div class="step info">
-				<p>
-					Wycenę zlecenia otrzymasz już w ciągu <strong>15 minut</strong>! Po akceptacji warunków zlecenia będziesz na
-					bieżąco informowany o statusie Twojego zlecenia przy pomocy wiadomości email. Zaraz po zakończeniu realizacji
-					otrzymasz dokument prosto na swoją pocztę email.
-				</p>
+
 			</div>
 		</div>
 	</div>

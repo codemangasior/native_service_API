@@ -1,0 +1,43 @@
+<div class="email-background" style="background: #eee;padding: 10px;">
+
+	<div class="pre-header" style="background: #eee;color: #eee;font-size: 5px;">
+		Zlecenie {{ secret_key }} W TRAKCIE REALIZACJI!
+	</div>
+	<div class="email-container"
+			 style="max-width: 500px;background-image: linear-gradient(to bottom, hsl(348, 100%, 61%), hsl(198, 1%, 88%));margin: 0 auto;font-family: sans-serif;overflow: hidden;border-radius: 5px; color: black">
+		<div class="center-content" style="text-align: center;">
+			<img src="https://nativeservice.pl/static/images/logo.webp" alt="logo"
+					 style="max-width: 100%;border-radius: 5px;">
+			<h1>Zlecenie w trakcie realizacji!</h1>
+
+		</div>
+		<div class="left-content" style="text-align: left; margin: 20px;">
+			<p style="font-size: 16px;font-weight: 300; line-height: 1.5;">
+				<strong>Dane zlecenia od klienta:</strong><br>
+				Tytuł: {{ title }}<br>
+				SECRET_KEY: {{ secret_key }}<br>
+				Priorytet <strong>{{ priority }}</strong><br>
+				Dodano: {{ create|date:"d.m.Y" }} {{ create|time:"H:i" }}<br>
+				Termin realizacji (klient): {{ date_to_be_done|date:"d.m.Y" }}<br>
+				Opis: {{ description }}
+			</p>
+			<p style="font-size: 16px;font-weight: 300; line-height: 1.5;">
+				<strong>Warunki realizacji:</strong><br>
+				Cena: {{ price }} zł<br>
+				Termin realizacji (wycena): {{ time_to_get_ready|date:"d.m.Y" }}<br>
+				Komentarz: {{ comments }}<br>
+			</p>
+		</div>
+		<p style="margin: 20px;font-size: 16px;font-weight: 300;text-align: center;line-height: 1.5;">
+			Po zakończeniu realizacji kliknij w przycisk poniżej aby zmienić status zlecenia na <strong>ZLECENIE
+			ZAKOŃCZONE</strong>.</p>
+		<div class="cta" style="text-align: center;margin: 20px;">
+			<a href="{{ url }}"
+				 style="text-decoration: none;display: inline-block;background: #001f44;color: white;padding: 10px;border-radius: 5px;">ZLECENIE
+				ZAKOŃCZONE</a>
+		</div>
+	</div>
+	<div class="footer-junk" style="text-align: center;background: none;padding: 20px;font-size: 12px;">
+		<a href="https://nativeservice.pl/">nativeservice.pl</a>
+	</div>
+</div>
