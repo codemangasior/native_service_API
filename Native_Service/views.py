@@ -224,8 +224,8 @@ class FinalPricing(LoginRequiredMixin, UpdateView):
 
     def get(self, *args, **kwargs):
         self.request.session.set_test_cookie()
-        _object = self.get_object()
-        context = self.get_context_data(object=_object)
+        self.object = self.get_object()
+        context = self.get_context_data(object=self.object)
 
         # Gets 'secret_key' from url
         path = self.request.path
@@ -414,8 +414,8 @@ class RejectOrder(LoginRequiredMixin, UpdateView):
     def get(self, *args, **kwargs):
 
         if self.request.session.test_cookie_worked:
-            _object = self.get_object()
-            context = self.get_context_data(object=_object)
+            self.object = self.get_object()
+            context = self.get_context_data(object=self.object)
 
             # Gets secret_key from session
             secret_key = self.request.session["secret_key"]
