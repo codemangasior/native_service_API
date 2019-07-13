@@ -3,7 +3,7 @@ API for handling files and custom forms of NativeService.
 
 # What is NativeService?
 NativeService API is a business tool for a growing startup based on translations and profiled services. The main 
-assumption of NS is to deliver 'product' to the customer as fast as they need it with minimalizing requirements for 
+assumption of NS is to deliver 'product' to the customer as fast as they need it with minimize requirements for 
 customers. The main motto of NS is "Get it done with a couple of clicks from home".
 
 # How does it work?
