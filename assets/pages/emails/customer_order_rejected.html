@@ -8,18 +8,18 @@
 		<div class="center-content" style="text-align: center;">
 			<img src="https://nativeservice.pl/static/images/logo.webp" alt="logo"
 					 style="max-width: 100%;border-radius: 5px;">
-			<h1>{{ name }} niestety Twoje zlecenie zostało odrzucone</h1>
+			<h1>{{ name }}, niestety Twoje zlecenie zostało odrzucone</h1>
 
 		</div>
 		<div class="left-content" style="text-align: left; margin: 20px;">
 			<p style="font-size: 16px;font-weight: 300; line-height: 1.5;">
 				<strong>Dane Twojego zlecenia:</strong><br>
-				Tytuł: {{ title }}<br>
-				SECRET_KEY: {{ secret_key }}<br>
-				Priorytet <strong>{{ priority }}</strong><br>
-				Dodano: {{ create|date:"d.m.Y" }}<br>
-				Termin realizacji: {{ date_to_be_done|date:"d.m.Y" }}<br>
-				Opis: {{ description }}
+				<strong>Tytuł:</strong> {{ title }}<br>
+				<strong>Klucz:</strong> {{ secret_key }}<br>
+				<strong>Priorytet:</strong> <strong>{{ priority }}</strong><br>
+				<strong>Dodano:</strong> {{ create|date:"d.m.Y" }}<br>
+				<strong>Termin realizacji:</strong> {{ date_to_be_done|date:"d.m.Y" }}<br>
+				<strong>Opis:</strong> {{ description }}
 			</p>
 			<p style="font-size: 16px;font-weight: 300; line-height: 1.5;">
 				<strong>Przyczyna odrzucenia:</strong><br>

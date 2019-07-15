@@ -7,7 +7,7 @@
 			Potwierdź warunki realizacji zlecenia.
 		</h1>
 		<p>
-			Po zapoznaniu się z warunkami, aby przejść do płatności, kliknij poniższy link.
+			Po zapoznaniu się z warunkami, aby przejść do płatności, kliknij przycisk na dole strony.
 		</p>
 	</div>
 	<div class="body seventy">
@@ -27,20 +27,20 @@
 
 				<h1>Zlecenie:</h1>
 				<p>
-					<strong>Tytul:</strong> {{ title }}<br>
+					<strong>Tytuł:</strong> {{ title }}<br>
 					<strong>Podana data realizacji:</strong> {{ date_to_be_done|date:"d.m.Y" }}<br>
+					<strong>Klucz:</strong> {{ secret_key }}<br>
 					<strong>Opis:</strong> {{ description }}<br>
-					<strong>Secret-key:</strong> {{ secret_key }}<br>
+
 				</p>
 			</div>
 			<div class="box price">
 
 				<h1>Warunki realizacji:</h1>
 				<p>
-					<strong>Tytul:</strong> {{ title }}<br>
 					<strong>Data realizacji:</strong> {{ time_to_get_ready|date:"d.m.Y" }}<br>
 					<strong>Komentarz:</strong> {{ comments }}<br>
-					<strong>Cena:</strong> {{ price }} zł<br>
+					<strong>Cena:</strong> <u>{{ price }} zł</u><br>
 
 				</p>
 			</div>
@@ -48,7 +48,8 @@
 				<h1>Akceptuj warunki zlecenia:</h1>
 				<p>
 					Klikając w przycisk poniżej akceptujesz nasz regulamin, politykę prywatności oraz warunki realizacji zlecenia.
-					Jednocześnie zostaniesz przekirowany do strony realizacji płatności.
+					Jednocześnie zostaniesz przekierowany do strony realizacji płatności.<br>
+					Wszystkie dokumenty znajdziesz <a href="#">tutaj</a>.
 				</p>
 				<p>
 					<a href="{{ accept_url }}">

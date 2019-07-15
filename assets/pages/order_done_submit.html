@@ -1,7 +1,7 @@
 {% extends "base.html" %} {% block title %}NativeService API - Formularz wysłany{% endblock %}
 {% block content %}
 	<div class="second bar">
-		<h1>Zlecenie <strong>{{ title }}</strong> zostało zakończone</h1>
+		<h1>Zlecenie zostało zakończone</h1>
 		<p>
 			Poniżej dane zakończonego zlecenia.
 		</p>
@@ -24,21 +24,20 @@
 
 					<h1>Zlecenie:</h1>
 					<p>
-						<strong>Tytul:</strong> {{ title }}<br>
+						<strong>Tytuł:</strong> {{ title }}<br>
 						<strong>Podana data realizacji:</strong> {{ date_to_be_done|date:"d.m.Y" }}<br>
+						<strong>Klucz:</strong> {{ secret_key }}<br>
 						<strong>Opis:</strong> {{ description }}<br>
-						<strong>Secret-key:</strong> {{ secret_key }}<br>
+
 					</p>
 				</div>
 				<div class="box price">
 
 					<h1>Warunki realizacji:</h1>
 					<p>
-						<strong>Tytul:</strong> {{ title }}<br>
 						<strong>Data realizacji:</strong> {{ time_to_get_ready|date:"d.m.Y" }}<br>
 						<strong>Komentarz:</strong> {{ comments }}<br>
 						<strong>Cena:</strong> {{ price }} zł<br>
-
 					</p>
 				</div>
 			</div>
