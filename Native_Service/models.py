@@ -39,8 +39,8 @@ class NativePost(models.Model):
     stage = models.CharField(
         max_length=50, choices=STAGE, default="W KOLEJCE", verbose_name="Etap zlecenia"
     )
-    email = models.CharField(max_length=100, verbose_name="Email")
-    phone = models.CharField(max_length=20, verbose_name="Numer Telefonu")
+    email = models.CharField(max_length=100, verbose_name="Twój e-mail")
+    phone = models.CharField(max_length=20, verbose_name="Twój numer Telefonu")
     url_date = models.DateField(auto_now_add=True)
     create = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
