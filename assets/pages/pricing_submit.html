@@ -1,14 +1,14 @@
 {% extends "base.html" %} {% block title %}NativeService API - Formularz wysłany{% endblock %}
 {% block content %}
 	<div class="second bar">
-		<h1>Zlecenie nr {{ id }}/2019 jest w trakcie wyceny!</h1>
+		<h1>{{ name }}, Twoje zlecenie jest w trakcie wyceny!</h1>
 		<p>
-			Oto Twój klucz: <strong>{{ secret_key }}</strong>. Zapisz go w celu daleszej realizacji zlecenia.<br>
-			Pamiętaj aby nikomu nie udostępniać Twojego klucza. Od tego zależy bezpieczeństwo Twoich danych.
+			Oto Twój klucz: <strong>{{ secret_key }}</strong>. Zapisz go w celu dalszej realizacji zlecenia.<br>
+			Pamiętaj aby nikomu nie udostępniać swojego klucza. Od tego zależy bezpieczeństwo Twoich danych.
 		</p>
 
 		<p>
-			{{ name }} skontaktujemy się z Tobą w celu ustalenia warunków realizacji zlecenia.
+			Skontaktujemy się z Tobą w celu ustalenia warunków realizacji zlecenia.
 		</p>
 	</div>
 	<div class="body seventy">

@@ -14,6 +14,17 @@
 		<!-- container -->
 		<div class="stepbystep">
 			<div class="container">
+			<p>
+				<strong>Dane zlecenia:</strong><br>
+				Tytuł: {{ title }}<br>
+				KLUCZ: {{ secret_key }}<br>
+				Priorytet: <strong>{{ priority }}</strong><br>
+				Dodano: {{ now }}<br>
+				Termin realizacji: {{ date_to_be_done|date:"d.m.Y" }}<br>
+				Opis: {{ description }}
+			</p>
+
+
 				<form method="post">{% csrf_token %}
 					{% csrf_token %}
 					{% load widget_tweaks %}

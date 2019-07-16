@@ -5,9 +5,9 @@
 
 
 	<div class="second bar">
-		<h1>Wypełnij formularz dotyczący zlecenia</h1>
+		<h1>Zakończ zlecenie</h1>
 		<p>
-			W razie potrzeby załącz nam niezbędne pliki.
+			W razie potrzeby załącz dla klienta niezbędne pliki.
 		</p>
 	</div>
 	<div class="body seventy">
@@ -17,17 +17,17 @@
 				<div class="box price">
 					<p>
 						<strong>Dane dotyczące zlecenia</strong>:<br>
-						Tytuł: {{ title }}<br>
-						SECRET_KEY: <strong>{{ secret_key }}</strong><br>
-						Priorytet <strong>{{ priority }}</strong><br>
-						Dodano: {{ create|date:"d.m.Y" }} {{ create|time:"H:i" }}<br>
-						Opis: {{ description }}<br>
+						<strong>Tytuł:</strong> {{ title }}<br>
+						<strong>Klucz:</strong> <strong>{{ secret_key }}</strong><br>
+						<strong>Priorytet:</strong> <strong>{{ priority }}</strong><br>
+						<strong>Dodano:</strong> {{ create|date:"d.m.Y" }} {{ create|time:"H:i" }}<br>
+						<strong>Opis:</strong> {{ description }}<br>
 					</p>
 					<p>
 						<strong>Warunki realizacji:</strong><br>
-						Cena: {{ price }} zł<br>
-						Termin realizacji (wycena): {{ time_to_get_ready|date:"d.m.Y" }}<br>
-						Komentarz: {{ comments }}<br>
+						<strong>Cena:</strong> {{ price }} zł<br>
+						<strong>Termin realizacji (wycena):</strong> {{ time_to_get_ready|date:"d.m.Y" }}<br>
+						<strong>Komentarz:</strong> {{ comments }}<br>
 					</p>
 				</div>
 				<form method="POST" enctype="multipart/form-data">

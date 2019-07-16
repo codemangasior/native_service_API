@@ -14,22 +14,22 @@
 		<div class="left-content" style="text-align: left; margin: 20px;">
 			<p style="font-size: 16px;font-weight: 300; line-height: 1.5;">
 				<strong>Dane zlecenia od klienta:</strong><br>
-				Tytuł: {{ title }}<br>
-				SECRET_KEY: {{ secret_key }}<br>
-				Priorytet <strong>{{ priority }}</strong><br>
-				Dodano: {{ create|date:"d.m.Y" }} {{ create|time:"H:i" }}<br>
-				Termin realizacji (klient): {{ date_to_be_done|date:"d.m.Y" }}<br>
-				Opis: {{ description }}
+				<strong>Tytuł:</strong> {{ title }}<br>
+				<strong>Klucz:</strong> {{ secret_key }}<br>
+				<strong>Priorytet:</strong> <strong>{{ priority }}</strong><br>
+				<strong>Dodano:</strong> {{ create|date:"d.m.Y" }} {{ create|time:"H:i" }}<br>
+				<strong>Termin realizacji (klient):</strong> {{ date_to_be_done|date:"d.m.Y" }}<br>
+				<strong>Opis:</strong> {{ description }}
 			</p>
 			<p style="font-size: 16px;font-weight: 300; line-height: 1.5;">
 				<strong>Warunki realizacji:</strong><br>
-				Cena: {{ price }} zł<br>
-				Termin realizacji (wycena): {{ time_to_get_ready|date:"d.m.Y" }}<br>
-				Komentarz: {{ comments }}<br>
+				<strong>Cena:</strong> {{ price }} zł<br>
+				<strong>Termin realizacji (wycena):</strong> {{ time_to_get_ready|date:"d.m.Y" }}<br>
+				<strong>Komentarz:</strong> {{ comments }}<br>
 			</p>
 		</div>
 		<p style="margin: 20px;font-size: 16px;font-weight: 300;text-align: center;line-height: 1.5;">
-			Po zakończeniu realizacji kliknij w przycisk poniżej aby zmienić status zlecenia na <strong>ZLECENIE
+			Po zakończeniu realizacji kliknij w przycisk poniżej, aby zmienić status zlecenia na <strong>ZLECENIE
 			ZAKOŃCZONE</strong>.</p>
 		<div class="cta" style="text-align: center;margin: 20px;">
 			<a href="{{ url }}"
