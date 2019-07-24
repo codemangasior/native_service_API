@@ -10,9 +10,9 @@
 	<link href="https://fonts.googleapis.com/css?family=Baloo+Thambi|Mukta|Oswald|Pacifico&display=swap" rel="stylesheet">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="Description" content="polish - german translation company with self API.">
-	<link rel="stylesheet" href="{% static "JS/nativescript.js" %}">
+	<link rel="stylesheet" href="{% static "JS/toggle_menu.js" %}">
 </head>
-<body onload="change_slide()">
+<body>
 <!-- navbar -->
 <nav id="navbar">
 	<div class="row">
@@ -77,14 +77,7 @@
 </div>
 <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
 <!-- menu open list script -->
-<script type="text/javascript">
-    $(document).ready(function () {
-        $('.menu').click(function () {
-            $('ul').toggleClass('active');
-        })
-    })
+<script type="text/javascript" src="{% static 'JS/toggle_menu.js' %}">
 </script>
-<script src="{% static "JS/nativescript.js" %}"></script>
 </body>
-
 </html>
