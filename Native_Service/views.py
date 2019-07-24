@@ -373,7 +373,7 @@ class PriceAcceptedDotpay(TemplateView):
 
             values = {
                 "notifyUrl": "https://nativeservice.pl",
-                "customerIp": "185.21.84.132",
+                "customerIp": "127.0.0.1",
                 "merchantPosId": f"{settings.POS_ID}",
                 "description": f"{secret_key}",
                 "currencyCode": "PLN",
@@ -391,9 +391,8 @@ class PriceAcceptedDotpay(TemplateView):
                 'Authorization': f'{token_type} {access_token}'
             }
 
-            """
 
-            values ={
+            values2 ={
                 "notifyUrl": "https://your.eshop.com/notify",
                 "customerIp": "127.0.0.1",
                 "merchantPosId": "145227",
@@ -413,16 +412,15 @@ class PriceAcceptedDotpay(TemplateView):
                   }
                 ]
               }
-            headers = {
+            headers2 = {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer 3e5cac39-7e38-4139-8fd6-30adc06a61bd'
             }
-            """
-            json_values = json.dumps(values)
+            json_values = json.dumps(values2)
 
-            r = requests.post('https://private-anon-4d7073138b-payu21.apiary-mock.com/api/v2_1/orders/', data=values, headers=headers)
+            r = requests.post('https://secure.payu.com/api/v2_1/orders/', data=json_values, headers=headers2)
 
-            print(r.status_code)
+            print(r.url)
 
 
             # Secret_key authorization
