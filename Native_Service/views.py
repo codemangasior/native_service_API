@@ -22,10 +22,10 @@ from Native_Service.lib.native_service import ProgressStages
 from Native_Service.lib.native_service import UrlsGenerator
 from Native_Service.lib.native_service import SecretKey
 from Native_Service.lib.native_service import STAGES
+from Native_Service.lib import payu
 import datetime
 import json
 import urllib
-from urllib import parse
 from urllib import request
 import requests
 from urllib import parse
@@ -339,41 +339,15 @@ class PriceAcceptedDotpay(TemplateView):
 
             """ PayU integration """
 
-            # GETTING TOKEN
+            # Getting token
+            token = payu.payu_token_data_set(data_dict)
+            print(token)
 
-            token_url_endpoint = "https://private-anon-4d7073138b-payu21.apiary-mock.com/pl/standard/user/oauth/authorize"
-
-            query = f"grant_type=client_credentials&client_id={settings.CLIENT_ID}&client_secret={settings.CLIENT_SECRET}"
-
-            token_values = parse.quote(query)
-
-            token_headers = {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-
-            token_request = requests.post(token_url_endpoint, data=token_values, headers=token_headers)
-
-            token_response_utf8 = token_request.content.decode("utf-8")
-
-            decoded = json.decoder.JSONDecoder()
-            token_response = decoded.decode(token_response_utf8)
-
-            print(token_response)
-
-
-            access_token = token_response['access_token']
-            token_type = token_response['token_type'].capitalize()
-            refresh_token = token_response['refresh_token']
-            expires_in = token_response['expires_in']
-            print(token_type)
             # CREATING ORDER
-
-            # endpoint for new order
-            url = settings.PAYU_ENDPOINT
 
             values = {
                 "notifyUrl": "https://nativeservice.pl",
-                "customerIp": "127.0.0.1",
+                "customerIp": "188.146.97.129",
                 "merchantPosId": f"{settings.POS_ID}",
                 "description": f"{secret_key}",
                 "currencyCode": "PLN",
@@ -388,13 +362,14 @@ class PriceAcceptedDotpay(TemplateView):
               }
             headers = {
                 'Content-Type': 'application/json',
-                'Authorization': f'{token_type} {access_token}'
+                'Authorization': f"{token['token_type'].capitalize()} {token['access_token']}"
             }
+            print(headers)
 
 
             values2 ={
                 "notifyUrl": "https://your.eshop.com/notify",
-                "customerIp": "127.0.0.1",
+                "customerIp": "188.146.97.129",
                 "merchantPosId": "145227",
                 "description": "RTV market",
                 "currencyCode": "PLN",
@@ -416,10 +391,11 @@ class PriceAcceptedDotpay(TemplateView):
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer 3e5cac39-7e38-4139-8fd6-30adc06a61bd'
             }
-            json_values = json.dumps(values2)
+            json_values = json.dumps(values)
 
-            r = requests.post('https://secure.payu.com/api/v2_1/orders/', data=json_values, headers=headers2)
+            r = requests.post(settings.PAYU_ORDER_ENDPOINT_URL, data=json_values, headers=headers)
 
+            print(r.status_code)
             print(r.url)
 
 
