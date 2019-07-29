@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.forms import UsernameField
+
 from .models import NativePost
 from .models import NativeProduct
 
@@ -24,14 +25,14 @@ MONTHS = {
 class PricingForm(forms.ModelForm):
     """ Basic form for all categories. """
 
-    email = forms.CharField(label="Twój e-mail", max_length=100, widget=forms.EmailInput())
+    email = forms.CharField(
+        label="Twój e-mail", max_length=100, widget=forms.EmailInput()
+    )
     date_to_be_done = forms.DateField(
         widget=forms.SelectDateWidget(months=MONTHS),
         label="Data najpóźniejszej realizacji",
     )
-    description = forms.CharField(
-        label="Opis zlecenia", widget=forms.Textarea
-    )
+    description = forms.CharField(label="Opis zlecenia", widget=forms.Textarea)
     # todo validation for doc, docx, pdf, txt, png, jpeg, jpg, webp
     # todo set size limits
     file = forms.FileField(
@@ -102,9 +103,7 @@ class FinalPricingForm(forms.ModelForm):
         widget=forms.SelectDateWidget(months=MONTHS), label="Data planowanej realizacji"
     )
     price = forms.CharField(label="Cena [zł]", max_length=10)
-    comments = forms.CharField(
-        label="Uwagi do wyceny", widget=forms.Textarea
-    )
+    comments = forms.CharField(label="Uwagi do wyceny", widget=forms.Textarea)
     secret_key = forms.CharField(required=True, widget=forms.HiddenInput())
 
     class Meta:
