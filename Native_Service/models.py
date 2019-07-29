@@ -27,25 +27,25 @@ class NativePost(models.Model):
     category = models.CharField(
         max_length=50, choices=CATEGORY_CHOICE, verbose_name="Kategoria"
     )
-    name = models.CharField(max_length=50, verbose_name="Imię")
-    last_name = models.CharField(max_length=50, verbose_name="Nazwisko")
-    title = models.CharField(max_length=200, verbose_name="Nazwa zlecenia")
+    name = models.CharField(max_length=50, verbose_name="* Imię")
+    last_name = models.CharField(max_length=50, verbose_name="* Nazwisko")
+    title = models.CharField(max_length=200, verbose_name="* Nazwa zlecenia")
     priority = models.CharField(
         max_length=15,
         choices=PRIORITY_CHOICE,
         default="STANDARD",
-        verbose_name="Priorytet",
+        verbose_name="* Priorytet",
     )
     stage = models.CharField(
         max_length=50, choices=STAGE, default="W KOLEJCE", verbose_name="Etap zlecenia"
     )
-    email = models.CharField(max_length=100, verbose_name="Twój e-mail")
-    phone = models.CharField(max_length=20, verbose_name="Twój numer Telefonu")
+    email = models.CharField(max_length=100, verbose_name="* Twój e-mail")
+    phone = models.CharField(max_length=20, verbose_name="* Twój numer Telefonu")
     url_date = models.DateField(auto_now_add=True)
     create = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     date_to_be_done = models.DateField()
-    description = models.TextField(verbose_name="Opis zlecenia")
+    description = models.TextField(verbose_name="* Opis zlecenia")
     secret_key = models.CharField(max_length=45)
     slug = models.SlugField(unique=True)
     time_to_get_ready = models.DateField(

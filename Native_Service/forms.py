@@ -24,13 +24,13 @@ MONTHS = {
 class PricingForm(forms.ModelForm):
     """ Basic form for all categories. """
 
-    email = forms.CharField(label="Twój e-mail", max_length=100, widget=forms.EmailInput())
+    email = forms.CharField(label="* Twój e-mail", max_length=100, widget=forms.EmailInput())
     date_to_be_done = forms.DateField(
         widget=forms.SelectDateWidget(months=MONTHS),
-        label="Data najpóźniejszej realizacji",
+        label="* Data najpóźniejszej realizacji",
     )
     description = forms.CharField(
-        label="Opis zlecenia", widget=forms.Textarea
+        label="* Opis zlecenia", widget=forms.Textarea
     )
     # todo validation for doc, docx, pdf, txt, png, jpeg, jpg, webp
     # todo set size limits
