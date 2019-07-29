@@ -223,6 +223,9 @@ class FinalPricing(LoginRequiredMixin, UpdateView):
         path = self.request.path
         secret_key = path.rsplit("/")[-2]
 
+        # Function gets all data from nativepost models with secret_key
+        data_dict = get_data_from_nativepost(secret_key)
+
         # Creates FileListView url
         file_list_url = UrlsGenerator().view_file_list_view(secret_key)
 
@@ -232,10 +235,12 @@ class FinalPricing(LoginRequiredMixin, UpdateView):
         # Passing secret_key by session to other methods
         self.request.session["secret_key"] = secret_key
 
-        # Updates context
-        context.update(
+        # urls for view
+        data_dict.update(
             {"file_list_url": file_list_url, "reject_order_url": reject_order_url}
         )
+        # Updates context
+        context.update(data_dict)
 
         # Render only if secret key exists in db
         if secret_key == get_data_from_nativepost(secret_key)["secret_key"]:
