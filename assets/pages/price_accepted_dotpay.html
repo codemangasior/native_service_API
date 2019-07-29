@@ -19,6 +19,12 @@
 					cena: {{ price }}
 				</p>
 				<p>
+					{{ error }}
+					{{ error_description }}
+					{{ access_token }}
+					{{ token_type }}
+				</p>
+				<p>
 					<a href="{% url "Native_Service:dotpay_payment_done" slug %}">successful payment</a>
 				</p>
 

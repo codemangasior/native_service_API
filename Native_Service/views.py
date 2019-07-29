@@ -340,63 +340,14 @@ class PriceAcceptedDotpay(TemplateView):
             """ PayU integration """
 
             # Getting token
-            token = payu.payu_token_data_set(data_dict)
+            token = payu.get_token(data_dict)
             print(token)
 
+            data_dict.update(token)
+
             # CREATING ORDER
+            #order = payu.order_request(data_dict, token)
 
-            values = {
-                "notifyUrl": "https://nativeservice.pl",
-                "customerIp": "188.146.97.129",
-                "merchantPosId": f"{settings.POS_ID}",
-                "description": f"{secret_key}",
-                "currencyCode": "PLN",
-                "totalAmount": f"{data_dict['price']}00",
-                "products": [
-                  {
-                    "name": f"{data_dict['title']}",
-                    "unitPrice": f"{data_dict['price']}00",
-                    "quantity": "1"
-                  },
-                ]
-              }
-            headers = {
-                'Content-Type': 'application/json',
-                'Authorization': f"{token['token_type'].capitalize()} {token['access_token']}"
-            }
-            print(headers)
-
-
-            values2 ={
-                "notifyUrl": "https://your.eshop.com/notify",
-                "customerIp": "188.146.97.129",
-                "merchantPosId": "145227",
-                "description": "RTV market",
-                "currencyCode": "PLN",
-                "totalAmount": "21000",
-                "products": [
-                  {
-                    "name": "Wireless mouse",
-                    "unitPrice": "15000",
-                    "quantity": "1"
-                  },
-                  {
-                    "name": "HDMI cable",
-                    "unitPrice": "6000",
-                    "quantity": "1"
-                  }
-                ]
-              }
-            headers2 = {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer 3e5cac39-7e38-4139-8fd6-30adc06a61bd'
-            }
-            json_values = json.dumps(values)
-
-            r = requests.post(settings.PAYU_ORDER_ENDPOINT_URL, data=json_values, headers=headers)
-
-            print(r.status_code)
-            print(r.url)
 
 
             # Secret_key authorization
