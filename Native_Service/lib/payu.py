@@ -16,7 +16,7 @@ def get_token(order_data):
     """
 
     request_headers = {"Cache-Control": "no-cache", "Content-Type": "application/x-www-form-urlencoded"}
-    query = f"grant_type=trusted_merchant&client_id=300746&client_secret=2ee86a66e5d97e3fadc400c9f19b065d&email={order_data['email']}&ext_customer_id={order_data['secret_key']}"
+    query = f"grant_type=trusted_merchant&client_id={settings.CLIENT_ID}&client_secret={settings.CLIENT_SECRET}&email={order_data['email']}&ext_customer_id={order_data['secret_key']}"
     # Encoding query request
     request_values = parse.quote(query)
     token_request = requests.post(
@@ -74,7 +74,6 @@ def order_request(order_data, token_data):
         'Content-Type': 'application/json',
         'Authorization': f"{token_data['token_type'].capitalize()} {token_data['access_token']}"
     }
-    print(headers)
 
     values2 = {
         "notifyUrl": "https://your.eshop.com/notify",
@@ -100,8 +99,8 @@ def order_request(order_data, token_data):
         'Content-Type': 'application/json',
         'Authorization': 'Bearer 3e5cac39-7e38-4139-8fd6-30adc06a61bd'
     }
-    json_values = json.dumps(values)
 
+    json_values = json.dumps(values)
     r = requests.post(settings.PAYU_ORDER_ENDPOINT_URL, data=json_values, headers=headers)
 
-    return r.status_code, r.url
+    return r.url

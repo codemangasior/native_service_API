@@ -341,14 +341,10 @@ class PriceAcceptedDotpay(TemplateView):
 
             # Getting token
             token = payu.get_token(data_dict)
-            print(token)
-
             data_dict.update(token)
 
             # CREATING ORDER
-            #order = payu.order_request(data_dict, token)
-
-
+            # order = payu.order_request(data_dict, token)
 
             # Secret_key authorization
             if secret_key == url_secret_key:
