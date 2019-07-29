@@ -1,9 +1,21 @@
+import datetime
+
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.crypto import get_random_string
+
 from Native_Service.models import NativePost
-import datetime
+
+
+def get_data_from_nativepost(secret_key):
+    """ Function returns all data from native post filtered with secret_key."""
+    data = NativePost.objects.filter(secret_key=secret_key)
+
+    data_dict = {}
+    for i in data.values():
+        data_dict.update(i)
+    return data_dict
 
 
 class STAGES:
