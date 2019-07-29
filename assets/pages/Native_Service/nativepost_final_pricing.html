@@ -19,7 +19,7 @@
 				Tytuł: {{ title }}<br>
 				KLUCZ: {{ secret_key }}<br>
 				Priorytet: <strong>{{ priority }}</strong><br>
-				Dodano: {{ now }}<br>
+				Dodano: {{ create|date:"d.m.Y" }}<br>
 				Termin realizacji: {{ date_to_be_done|date:"d.m.Y" }}<br>
 				Opis: {{ description }}
 			</p>
