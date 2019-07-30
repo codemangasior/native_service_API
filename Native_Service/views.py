@@ -340,15 +340,19 @@ class PriceAcceptedDotpay(TemplateView):
             """ PayU integration """
 
             # Getting token
-            token = payu.get_token(data_dict)
-            data_dict.update(token)
+            #token = payu.get_token(data_dict)
+            #data_dict.update(token)
 
             # CREATING ORDER
             # order = payu.order_request(data_dict, token)
 
+            # sign method
+            new_data_dict = payu.sign_algorithm(data_dict)
+
+
             # Secret_key authorization
             if secret_key == url_secret_key:
-                return self.render_to_response(data_dict)
+                return self.render_to_response(new_data_dict)
             else:
                 raise ValueError(
                     "SECRET_KEY does not exist, or you have problem with cookies."
