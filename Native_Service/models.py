@@ -51,6 +51,7 @@ class NativePost(models.Model):
     time_to_get_ready = models.DateField(
         verbose_name="Szacowany czas realizacji zlecenia", null=True
     )
+    # todo change CharField to IntegerField
     price = models.CharField(max_length=10, verbose_name="Cena", null=True)
     comments = models.TextField(verbose_name="Komentarz do zlecenia", null=True)
     file = models.CharField(null=True, blank=True, verbose_name="Plik", max_length=255)

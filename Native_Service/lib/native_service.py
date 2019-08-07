@@ -101,6 +101,16 @@ class UrlsGenerator:
         return f"{settings.HOST_URL}/file_list/{secret_key}/"
 
     @staticmethod
+    def view_notify(secret_key):
+        """ Method generates url for PayU to sent request. """
+        return f"{settings.HOST_URL}/notify/"
+
+    @staticmethod
+    def view_successful_payment(secret_key):
+        """ Method generates url for performer to see successful_payment view. """
+        return f"{settings.HOST_URL}/successful_payment/{secret_key}/"
+
+    @staticmethod
     def view_order_in_progress(secret_key):
         """ Method generates url for performer to set stage on 'in_progress'. """
         return f"{settings.HOST_URL}/in_progress/{secret_key}/"

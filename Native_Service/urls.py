@@ -43,10 +43,11 @@ urlpatterns = [
         name="price_accepted",
     ),
     path(
-        "payment_done/<slug:slug>/",
-        views.DotpayPaymentDone.as_view(),
-        name="dotpay_payment_done",
+        "successful_payment/<slug:slug>/",
+        views.SuccessfulPayment.as_view(),
+        name="successful_payment",
     ),
+    path("notify/", views.Notify.as_view(), name="notifyt"),
     path(
         "in_progress/<slug:slug>/",
         views.OrderInProgress.as_view(),

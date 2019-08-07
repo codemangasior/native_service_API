@@ -333,6 +333,14 @@ class PriceAcceptedDotpay(TemplateView):
             path = self.request.path
             url_secret_key = path.rsplit("/")[-2]
 
+            # Get's notify url and pass to data_dict
+            notify_url = UrlsGenerator.view_notify(secret_key)
+            data_dict["notify_url"] = notify_url
+
+            # Get's successful payment url and pass to data_dict
+            successful_url = UrlsGenerator.view_successful_payment(secret_key)
+            data_dict["successful_url"] = successful_url
+
             # Setting stage on ACCEPTED
             if data_dict["stage"] == STAGES.WAITING_FOR_ACCEPT:
                 ProgressStages().accepted(data=data_dict, secret_key=secret_key)
@@ -340,32 +348,42 @@ class PriceAcceptedDotpay(TemplateView):
             """ PayU integration """
 
             # Getting token
-            #token = payu.get_token(data_dict)
-            #data_dict.update(token)
+            token = payu.get_token()
+            data_dict.update(token)
 
             # CREATING ORDER
-            # order = payu.order_request(data_dict, token)
-
-            # sign method
-            new_data_dict = payu.sign_algorithm(data_dict)
-
+            order_url = payu.order_request(data_dict, token)
+            data_dict["order_url"] = order_url
 
             # Secret_key authorization
             if secret_key == url_secret_key:
-                return self.render_to_response(new_data_dict)
+                return self.render_to_response(data_dict)
             else:
                 raise ValueError(
                     "SECRET_KEY does not exist, or you have problem with cookies."
                 )
 
 
-class DotpayPaymentDone(TemplateView):
+class Notify(TemplateView):
+    template_name = "notify.html"
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        return self.render_to_response(context)
+
+
+class SuccessfulPayment(TemplateView):
     """ View for a customer after successful payment. """
 
-    template_name = "successful_payment_dotpay.html"
+    template_name = "successful_payment.html"
 
     def get(self, *args, **kwargs):
         if self.request.session.test_cookie_worked():
+
+            if self.request.GET.get("error") == "501":
+                self.template_name = "unsuccessful_payment.html"
+            else:
+                self.template_name = "successful_payment.html"
 
             # Gets secret_key from session
             secret_key = self.request.session["secret_key"]
@@ -382,7 +400,9 @@ class DotpayPaymentDone(TemplateView):
                     data=data_dict, secret_key=secret_key, url=url
                 )
 
+            # todo check payment status with 'if' statements and handle cookies
             self.request.session.delete_test_cookie()
+            self.request.session.set_test_cookie()
             return self.render_to_response(data_dict)
         else:
             raise PermissionError("Cookies Error.")
