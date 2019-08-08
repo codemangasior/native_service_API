@@ -18,6 +18,16 @@ def get_data_from_nativepost(secret_key):
     return data_dict
 
 
+class NativeServiceMethods:
+    """ NativeService necessary methods. """
+
+    @staticmethod
+    def _date_today():
+        """ Returns tuple with actual values: YEAR, MONTH, DAY"""
+        time = datetime.datetime.now()
+        return time.strftime("%Y"), time.strftime("%m"), time.strftime("%d")
+
+
 class STAGES:
     IN_QUEUE = "W KOLEJCE"
     WAITING_FOR_ACCEPT = "OCZEKIWANIE NA AKCEPTACJĘ"
@@ -111,6 +121,16 @@ class UrlsGenerator:
     def view_file_list_view(secret_key):
         """ Method generates url for performer to see list of files. """
         return f"{settings.HOST_URL}/file_list/{secret_key}/"
+
+    @staticmethod
+    def view_notify(secret_key):
+        """ Method generates url for PayU to sent request. """
+        return f"{settings.HOST_URL}/notify/{secret_key}/"
+
+    @staticmethod
+    def view_successful_payment(secret_key):
+        """ Method generates url for performer to see successful_payment view. """
+        return f"{settings.HOST_URL}/successful_payment/{secret_key}/"
 
     @staticmethod
     def view_order_in_progress(secret_key):

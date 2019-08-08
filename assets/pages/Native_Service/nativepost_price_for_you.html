@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}NativeService API - Wycena zlecenia{% endblock %}
+{% block content %}
+	<div class="second bar">
+		<h1>
+			Potwierdź warunki realizacji zlecenia.
+		</h1>
+		<p>
+			Po zapoznaniu się z warunkami, aby przejść do płatności, kliknij przycisk na dole strony.
+		</p>
+	</div>
+	<div class="body seventy">
+		<!-- container -->
+		<div class="stepbystep price">
+			<div class="box price">
+
+				<h1>Twoje dane:</h1>
+				<p>
+					<strong>Imię:</strong> {{ name }}<br>
+					<strong>Nazwisko:</strong> {{ last_name }}<br>
+					<strong>Email:</strong> {{ email }}<br>
+					<strong>Telefon:</strong> {{ phone }}<br>
+				</p>
+			</div>
+			<div class="box price">
+
+				<h1>Zlecenie:</h1>
+				<p>
+					<strong>Tytuł:</strong> {{ title }}<br>
+					<strong>Podana data realizacji:</strong> {{ date_to_be_done|date:"d.m.Y" }}<br>
+					<strong>Klucz:</strong> {{ secret_key }}<br>
+					<strong>Opis:</strong> {{ description }}<br>
+
+				</p>
+			</div>
+			<div class="box price">
+
+				<h1>Warunki realizacji:</h1>
+				<p>
+					<strong>Data realizacji:</strong> {{ time_to_get_ready|date:"d.m.Y" }}<br>
+					<strong>Komentarz:</strong> {{ comments }}<br>
+					<strong>Cena:</strong> <u>{{ price }} zł</u><br>
+
+				</p>
+			</div>
+			<div class="box price">
+				<h1>Akceptuj warunki zlecenia:</h1>
+
+				<p>
+					Klikając w przycisk poniżej akceptujesz nasz regulamin, politykę prywatności oraz warunki realizacji zlecenia.
+					Jednocześnie zostaniesz przekierowany do strony realizacji płatności.
+				</p>
+				<p>
+					Wszystkie dokumenty znajdziesz <a href="#">tutaj</a>.
+				</p>
+
+					<form method="post">{% csrf_token %}
+					{% csrf_token %}
+					{% load widget_tweaks %}
+
+					{% for hidden_field in form.hidden_fields %}
+						{{ hidden_field }}
+					{% endfor %}
+
+					{% if form.non_field_errors %}
+						<div class="alert alert-danger" role="alert">
+							{% for error in form.non_field_errors %}
+								{{ error }}
+							{% endfor %}
+						</div>
+					{% endif %}
+
+					{% for field in form.visible_fields %}
+						<div class="form-group">
+						<div class="box price checkbox">
+							{{ field.label_tag }}<br>
+
+							{% if form.is_bound %}
+								{% if field.errors %}
+									{% render_field field class="form-control is-invalid" %}
+									{% for error in field.errors %}
+										<div class="invalid-feedback">
+											{{ error }}
+										</div>
+									{% endfor %}
+								{% else %}
+									{% render_field field class="form-control is-valid" %}
+								{% endif %}
+							{% else %}
+								{% render_field field class="form-control" %}
+							{% endif %}
+
+							{% if field.help_text %}
+								<small class="form-text text-muted">{{ field.help_text }}</small>
+							{% endif %}
+						</div>
+						</div>
+					{% endfor %}
+					<div class="holderbutton">
+						<input type="submit" value="PŁACĘ">
+					</div>
+				</form>
+
+				<p>
+					Pola oznaczone [*] wymagają wypełnienia.
+				</p>
+			</div>
+			<div class="step info">
+				<p>
+				</p>
+			</div>
+		</div>
+	</div>
+{% endblock %}

@@ -3,9 +3,10 @@ import datetime
 from urllib import parse
 from urllib import request
 
-from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from django.core.files.base import ContentFile
+from django.conf import settings
+from django.http import HttpResponse
 from django.views.generic import FormView
 from django.views.generic import TemplateView
 from django.views.generic import UpdateView
@@ -24,10 +25,12 @@ from .forms import TranslatingForm
 from .forms import RejectOrderForm
 from .forms import CustomAuthenticationForm
 from .forms import ProductForm
+from .forms import PriceForYouForm
 from Native_Service.lib.native_service import ProgressStages
 from Native_Service.lib.native_service import UrlsGenerator
 from Native_Service.lib.native_service import SecretKey
 from Native_Service.lib.native_service import STAGES
+from Native_Service.lib import payu
 from Native_Service.lib.native_service import get_data_from_nativepost
 
 
@@ -286,7 +289,6 @@ class FinalPricingSubmit(LoginRequiredMixin, TemplateView):
 
 
 class PriceForCustomer(TemplateView):
-    """ View for a customer which gives the possibility to accept the price. """
 
     template_name = "price_for_you.html"
 
@@ -310,6 +312,44 @@ class PriceForCustomer(TemplateView):
         return self.render_to_response(data_dict)
 
 
+class PriceForCustomer2(UpdateView):
+    """ View for a customer which gives the possibility to accept the price and terms. """
+
+    model = NativePost
+    template_name_suffix = "_price_for_you"
+    form_class = PriceForYouForm
+
+    def get(self, *args, **kwargs):
+        self.request.session.set_test_cookie()
+        self.object = self.get_object()
+        context = self.get_context_data(object=self.object)
+
+        # Gets 'secret_key' from url
+        path = self.request.path
+        secret_key = path.rsplit("/")[-2]
+
+        # Passing secret_key by session to other methods
+        self.request.session["secret_key"] = secret_key
+
+        # Function gets all data from nativepost models with secret_key
+        data_dict = get_data_from_nativepost(secret_key)
+
+        # Updates context
+        context.update(data_dict)
+
+        # Render only if secret key exists in db
+        if secret_key == get_data_from_nativepost(secret_key)["secret_key"]:
+            return self.render_to_response(context)
+        else:
+            raise ValueError("SECRET_KEY does not exist.")
+
+    def get_success_url(self):
+        """Return the URL to redirect to after processing a valid form."""
+        # Gets secret_key from session
+        secret_key = self.request.session["secret_key"]
+        return UrlsGenerator.view_price_accepted_dotpay(secret_key)
+
+
 class PriceAcceptedDotpay(TemplateView):
     """ View for a customer to use Dotpay. """
 
@@ -328,9 +368,27 @@ class PriceAcceptedDotpay(TemplateView):
             path = self.request.path
             url_secret_key = path.rsplit("/")[-2]
 
+            # Get's notify url and pass to data_dict
+            notify_url = UrlsGenerator.view_notify(secret_key)
+            data_dict["notify_url"] = notify_url
+
+            # Get's successful payment url and pass to data_dict
+            successful_url = UrlsGenerator.view_successful_payment(secret_key)
+            data_dict["successful_url"] = successful_url
+
             # Setting stage on ACCEPTED
             if data_dict["stage"] == STAGES.WAITING_FOR_ACCEPT:
                 ProgressStages().accepted(data=data_dict, secret_key=secret_key)
+
+            """ PayU integration """
+
+            # Getting token
+            token = payu.get_token()
+            data_dict.update(token)
+
+            # CREATING ORDER
+            order_url = payu.order_request(data_dict, token)
+            data_dict["order_url"] = order_url
 
             # Secret_key authorization
             if secret_key == url_secret_key:
@@ -341,13 +399,18 @@ class PriceAcceptedDotpay(TemplateView):
                 )
 
 
-class DotpayPaymentDone(TemplateView):
+class SuccessfulPayment(TemplateView):
     """ View for a customer after successful payment. """
 
-    template_name = "successful_payment_dotpay.html"
+    template_name = "successful_payment.html"
 
     def get(self, *args, **kwargs):
         if self.request.session.test_cookie_worked():
+
+            if self.request.GET.get("error") == "501":
+                self.template_name = "unsuccessful_payment.html"
+            else:
+                self.template_name = "successful_payment.html"
 
             # Gets secret_key from session
             secret_key = self.request.session["secret_key"]
@@ -364,7 +427,9 @@ class DotpayPaymentDone(TemplateView):
                     data=data_dict, secret_key=secret_key, url=url
                 )
 
+            # todo check payment status with 'if' statements and handle cookies
             self.request.session.delete_test_cookie()
+            self.request.session.set_test_cookie()
             return self.render_to_response(data_dict)
         else:
             raise PermissionError("Cookies Error.")
@@ -553,3 +618,16 @@ class OrderDoneSubmit(LoginRequiredMixin, TemplateView):
 
 class PerformerLoginView(LoginView):
     authentication_form = CustomAuthenticationForm
+
+
+""" PayU Endpoint """
+
+
+def notify(request):
+    """ Endpoint for PayU to sent information to NativeService. """
+    if request.method == "POST":
+        print(request.body)
+        return HttpResponse("POST")
+    if request.method == "GET":
+        print(request.body)
+        return HttpResponse("GET")

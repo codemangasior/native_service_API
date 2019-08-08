@@ -513,6 +513,10 @@ ul li a {
 	word-wrap: break-word;
 	margin-bottom: 15px;
 }
+.box.price.checkbox {
+	width: 95%;
+	text-align: left;
+}
 
 .btn {
 	background: darkgray;
@@ -708,6 +712,10 @@ input[type=submit]:hover {
 	height: 100px;
 }
 
+#id_price {
+	width: 98%;
+	height: auto;
+}
 
 #id_email {
 	width: 100%;
@@ -752,6 +760,17 @@ input[type=submit]:hover {
 	border-radius: 4px;
 }
 
+input[type=checkbox]
+{
+  /* Double-sized Checkboxes */
+  -ms-transform: scale(2); /* IE */
+  -moz-transform: scale(2); /* FF */
+  -webkit-transform: scale(2); /* Safari and Chrome */
+  -o-transform: scale(2); /* Opera */
+  transform: scale(2);
+  padding: 10px;
+}
+
 .file.preview {
 	width: 95%;
 	height: auto;
@@ -771,4 +790,5 @@ input[type=submit]:hover {
 .holderbutton {
 	text-align: center;
 	padding-top: 5px;
+	overflow-wrap: break-word;
 }

@@ -4,6 +4,7 @@ from django.contrib.auth.forms import UsernameField
 
 from .models import NativePost
 from .models import NativeProduct
+from Native_Service.lib.native_service import NativeServiceMethods
 
 
 MONTHS = {
@@ -31,6 +32,7 @@ class PricingForm(forms.ModelForm):
     date_to_be_done = forms.DateField(
         widget=forms.SelectDateWidget(months=MONTHS),
         label="Data najpóźniejszej realizacji",
+        initial="%s-%s-%s" % NativeServiceMethods._date_today(),
     )
     description = forms.CharField(label="Opis zlecenia", widget=forms.Textarea)
     # todo validation for doc, docx, pdf, txt, png, jpeg, jpg, webp
@@ -61,6 +63,9 @@ class PricingForm(forms.ModelForm):
             "slug",
             "file",
             "stage",
+            # "terms_of_service",
+            # "privacy_policy",
+            # "terms_of_order_realization"
         )
 
 
@@ -99,16 +104,37 @@ class TranslatingForm(PricingForm):
 class FinalPricingForm(forms.ModelForm):
     """ Performer form to set a price for costumer. """
 
+    # todo initial does not work
     time_to_get_ready = forms.DateField(
-        widget=forms.SelectDateWidget(months=MONTHS), label="Data planowanej realizacji"
+        widget=forms.SelectDateWidget(months=MONTHS),
+        label="Data planowanej realizacji",
+        initial="%s-%s-%s" % NativeServiceMethods._date_today(),
     )
-    price = forms.CharField(label="Cena [zł]", max_length=10)
+    price = forms.IntegerField(label="Cena [zł]")
     comments = forms.CharField(label="Uwagi do wyceny", widget=forms.Textarea)
     secret_key = forms.CharField(required=True, widget=forms.HiddenInput())
 
     class Meta:
         model = NativePost
         fields = ("time_to_get_ready", "price", "comments", "secret_key")
+
+
+class PriceForYouForm(forms.ModelForm):
+    """ Customer form to accept a rules and terms. """
+
+    terms_of_service = forms.BooleanField(
+        label="* Zapoznałem się z regulaminem NativeService", required=True
+    )
+    privacy_policy = forms.BooleanField(
+        label="* Zapoznałem się z polityką prywatności", required=True
+    )
+    terms_of_order_realization = forms.BooleanField(
+        label="* Zapoznałem się z warunkami realizacji zlecenia", required=True
+    )
+
+    class Meta:
+        model = NativePost
+        fields = ("terms_of_service", "privacy_policy", "terms_of_order_realization")
 
 
 class RejectOrderForm(forms.ModelForm):
