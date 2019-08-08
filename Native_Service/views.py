@@ -1,6 +1,7 @@
 from django.core.files.storage import FileSystemStorage
 from django.core.files.base import ContentFile
 from django.conf import settings
+from django.http import HttpResponse
 from django.views.generic import FormView
 from django.views.generic import TemplateView
 from django.views.generic import UpdateView
@@ -27,7 +28,6 @@ import datetime
 import json
 import urllib
 from urllib import request
-import requests
 from urllib import parse
 
 
@@ -364,12 +364,14 @@ class PriceAcceptedDotpay(TemplateView):
                 )
 
 
-class Notify(TemplateView):
-    template_name = "notify.html"
-
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-        return self.render_to_response(context)
+def notify(request):
+    """ Endpoint for PayU to sent information to NativeService. """
+    if request.method == 'POST':
+        print(request.body)
+        return HttpResponse('POST')
+    if request.method == 'GET':
+        print(request.body)
+        return HttpResponse('GET')
 
 
 class SuccessfulPayment(TemplateView):

@@ -708,6 +708,10 @@ input[type=submit]:hover {
 	height: 100px;
 }
 
+#id_price {
+	width: 98%;
+	height: auto;
+}
 
 #id_email {
 	width: 100%;

@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.forms import UsernameField
 from .models import NativePost
@@ -30,6 +31,7 @@ class PricingForm(forms.ModelForm):
     date_to_be_done = forms.DateField(
         widget=forms.SelectDateWidget(months=MONTHS),
         label="Data najpóźniejszej realizacji",
+        initial=f"{settings.YEAR}-{settings.MONTH}-{settings.DAY}",
     )
     description = forms.CharField(label="Opis zlecenia", widget=forms.Textarea)
     # todo validation for doc, docx, pdf, txt, png, jpeg, jpg, webp
@@ -97,11 +99,13 @@ class TranslatingForm(PricingForm):
 
 class FinalPricingForm(forms.ModelForm):
     """ Performer form to set a price for costumer. """
-
+    # todo initial does not work
     time_to_get_ready = forms.DateField(
-        widget=forms.SelectDateWidget(months=MONTHS), label="Data planowanej realizacji"
+        widget=forms.SelectDateWidget(months=MONTHS),
+        label="Data planowanej realizacjiiii",
+        initial=f"{settings.YEAR}-{settings.MONTH}-{settings.DAY}",
     )
-    price = forms.CharField(label="Cena [zł]", max_length=10)
+    price = forms.IntegerField(label="Cena [zł]")
     comments = forms.CharField(label="Uwagi do wyceny", widget=forms.Textarea)
     secret_key = forms.CharField(required=True, widget=forms.HiddenInput())
 

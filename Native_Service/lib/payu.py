@@ -60,7 +60,6 @@ def order_request(order_data, token_data):
         "Content-Type": "application/json",
         "Authorization": f"{token_data['token_type'].capitalize()} {token_data['access_token']}",
     }
-
     json_values = json.dumps(values)
     s = requests.Session()
     s.headers.update(headers)
