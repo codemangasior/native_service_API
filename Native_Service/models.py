@@ -44,15 +44,14 @@ class NativePost(models.Model):
     url_date = models.DateField(auto_now_add=True)
     create = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
-    date_to_be_done = models.DateField()
+    date_to_be_done = models.DateField(verbose_name="Data najpóźniejszej realizacji")
     description = models.TextField(verbose_name="Opis zlecenia")
     secret_key = models.CharField(max_length=45)
     slug = models.SlugField(unique=True)
     time_to_get_ready = models.DateField(
         verbose_name="Szacowany czas realizacji zlecenia", null=True
     )
-    # todo change CharField to IntegerField
-    price = models.CharField(max_length=10, verbose_name="Cena", null=True)
+    price = models.IntegerField(verbose_name="Cena", null=True)
     comments = models.TextField(verbose_name="Komentarz do zlecenia", null=True)
     file = models.CharField(null=True, blank=True, verbose_name="Plik", max_length=255)
     list_files = models.TextField(null=True, blank=True, verbose_name="Lista")
