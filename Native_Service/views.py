@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.views.generic import FormView
 from django.views.generic import TemplateView
 from django.views.generic import UpdateView
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.utils.crypto import get_random_string
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
@@ -19,6 +19,7 @@ from .forms import TranslatingForm
 from .forms import RejectOrderForm
 from .forms import CustomAuthenticationForm
 from .forms import ProductForm
+from .forms import PriceForYouForm
 from Native_Service.lib.native_service import ProgressStages
 from Native_Service.lib.native_service import UrlsGenerator
 from Native_Service.lib.native_service import SecretKey
@@ -291,7 +292,6 @@ class FinalPricingSubmit(LoginRequiredMixin, TemplateView):
 
 
 class PriceForCustomer(TemplateView):
-    """ View for a customer which gives the possibility to accept the price. """
 
     template_name = "price_for_you.html"
 
@@ -313,6 +313,44 @@ class PriceForCustomer(TemplateView):
         data_dict.update({"accept_url": price_accept_url})
 
         return self.render_to_response(data_dict)
+
+
+class PriceForCustomer2(UpdateView):
+    """ View for a customer which gives the possibility to accept the price and terms. """
+
+    model = NativePost
+    template_name_suffix = "_price_for_you"
+    form_class = PriceForYouForm
+
+    def get(self, *args, **kwargs):
+        self.request.session.set_test_cookie()
+        self.object = self.get_object()
+        context = self.get_context_data(object=self.object)
+
+        # Gets 'secret_key' from url
+        path = self.request.path
+        secret_key = path.rsplit("/")[-2]
+
+        # Passing secret_key by session to other methods
+        self.request.session["secret_key"] = secret_key
+
+        # Function gets all data from nativepost models with secret_key
+        data_dict = _get_data_from_nativepost(secret_key)
+
+        # Updates context
+        context.update(data_dict)
+
+        # Render only if secret key exists in db
+        if secret_key == _get_data_from_nativepost(secret_key)["secret_key"]:
+            return self.render_to_response(context)
+        else:
+            raise ValueError("SECRET_KEY does not exist.")
+
+    def get_success_url(self):
+        """Return the URL to redirect to after processing a valid form."""
+        # Gets secret_key from session
+        secret_key = self.request.session["secret_key"]
+        return UrlsGenerator.view_price_accepted_dotpay(secret_key)
 
 
 class PriceAcceptedDotpay(TemplateView):
@@ -362,16 +400,6 @@ class PriceAcceptedDotpay(TemplateView):
                 raise ValueError(
                     "SECRET_KEY does not exist, or you have problem with cookies."
                 )
-
-
-def notify(request):
-    """ Endpoint for PayU to sent information to NativeService. """
-    if request.method == "POST":
-        print(request.body)
-        return HttpResponse("POST")
-    if request.method == "GET":
-        print(request.body)
-        return HttpResponse("GET")
 
 
 class SuccessfulPayment(TemplateView):
@@ -593,3 +621,16 @@ class OrderDoneSubmit(LoginRequiredMixin, TemplateView):
 
 class PerformerLoginView(LoginView):
     authentication_form = CustomAuthenticationForm
+
+
+""" PayU Endpoint """
+
+
+def notify(request):
+    """ Endpoint for PayU to sent information to NativeService. """
+    if request.method == "POST":
+        print(request.body)
+        return HttpResponse("POST")
+    if request.method == "GET":
+        print(request.body)
+        return HttpResponse("GET")

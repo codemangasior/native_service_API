@@ -62,6 +62,9 @@ class PricingForm(forms.ModelForm):
             "slug",
             "file",
             "stage",
+            # "terms_of_service",
+            # "privacy_policy",
+            # "terms_of_order_realization"
         )
 
 
@@ -113,6 +116,24 @@ class FinalPricingForm(forms.ModelForm):
     class Meta:
         model = NativePost
         fields = ("time_to_get_ready", "price", "comments", "secret_key")
+
+
+class PriceForYouForm(forms.ModelForm):
+    """ Customer form to accept a rules and terms. """
+
+    terms_of_service = forms.BooleanField(
+        label="* Zapoznałem się z regulaminem NativeService", required=True
+    )
+    privacy_policy = forms.BooleanField(
+        label="* Zapoznałem się z polityką prywatności", required=True
+    )
+    terms_of_order_realization = forms.BooleanField(
+        label="* Zapoznałem się z warunkami realizacji zlecenia", required=True
+    )
+
+    class Meta:
+        model = NativePost
+        fields = ("terms_of_service", "privacy_policy", "terms_of_order_realization")
 
 
 class RejectOrderForm(forms.ModelForm):

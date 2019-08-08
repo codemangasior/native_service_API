@@ -55,6 +55,15 @@ class NativePost(models.Model):
     comments = models.TextField(verbose_name="Komentarz do zlecenia", null=True)
     file = models.CharField(null=True, blank=True, verbose_name="Plik", max_length=255)
     list_files = models.TextField(null=True, blank=True, verbose_name="Lista")
+    terms_of_service = models.BooleanField(
+        verbose_name="Regulamin NativeService", default=False, null=True
+    )
+    privacy_policy = models.BooleanField(
+        verbose_name="Polityka prywatności", default=False, null=True
+    )
+    terms_of_order_realization = models.BooleanField(
+        verbose_name="Warunki realizacji zlecenia", default=False, null=True
+    )
 
     def __str__(self):
         return f"{self.name} {self.last_name} tel:{self.phone} key:{self.secret_key}"
