@@ -47,7 +47,7 @@ urlpatterns = [
         views.SuccessfulPayment.as_view(),
         name="successful_payment",
     ),
-    path("notify/", views.notify, name="notifyt"),
+    path("notify/<slug:slug>/", views.notify, name="notifyt"),
     path(
         "in_progress/<slug:slug>/",
         views.OrderInProgress.as_view(),

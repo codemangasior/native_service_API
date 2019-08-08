@@ -366,12 +366,12 @@ class PriceAcceptedDotpay(TemplateView):
 
 def notify(request):
     """ Endpoint for PayU to sent information to NativeService. """
-    if request.method == 'POST':
+    if request.method == "POST":
         print(request.body)
-        return HttpResponse('POST')
-    if request.method == 'GET':
+        return HttpResponse("POST")
+    if request.method == "GET":
         print(request.body)
-        return HttpResponse('GET')
+        return HttpResponse("GET")
 
 
 class SuccessfulPayment(TemplateView):
