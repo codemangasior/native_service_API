@@ -34,7 +34,7 @@ urlpatterns = [
     ),
     path(
         "price_for_you/<slug:slug>/",
-        views.PriceForCustomer.as_view(),
+        views.PriceForCustomer2.as_view(),
         name="price_for_you",
     ),
     path(

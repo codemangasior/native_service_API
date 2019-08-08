@@ -26,7 +26,6 @@ def get_token():
 
     # Changing JSON string into python dict
     token_response = json.decoder.JSONDecoder().decode(token_response_utf8)
-    print(token_response)
     return token_response
 
 

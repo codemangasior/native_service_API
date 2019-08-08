@@ -106,7 +106,7 @@ class FinalPricingForm(forms.ModelForm):
     # todo initial does not work
     time_to_get_ready = forms.DateField(
         widget=forms.SelectDateWidget(months=MONTHS),
-        label="Data planowanej realizacjiiii",
+        label="Data planowanej realizacji",
         initial="%s-%s-%s" % NativeServiceMethods._date_today(),
     )
     price = forms.IntegerField(label="Cena [zł]")
