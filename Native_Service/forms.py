@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UsernameField
 
 from .models import NativePost
 from .models import NativeProduct
-from Native_Service.lib.native_service import NativeServiceMethods
+from Native_Service.lib.native_service import NSMethods
 
 
 MONTHS = {
@@ -32,7 +32,7 @@ class PricingForm(forms.ModelForm):
     date_to_be_done = forms.DateField(
         widget=forms.SelectDateWidget(months=MONTHS),
         label="Data najpóźniejszej realizacji",
-        initial="%s-%s-%s" % NativeServiceMethods._date_today(),
+        initial="%s-%s-%s" % NSMethods.date_today(),
     )
     description = forms.CharField(label="Opis zlecenia", widget=forms.Textarea)
     # todo validation for doc, docx, pdf, txt, png, jpeg, jpg, webp
@@ -63,9 +63,6 @@ class PricingForm(forms.ModelForm):
             "slug",
             "file",
             "stage",
-            # "terms_of_service",
-            # "privacy_policy",
-            # "terms_of_order_realization"
         )
 
 
@@ -108,7 +105,7 @@ class FinalPricingForm(forms.ModelForm):
     time_to_get_ready = forms.DateField(
         widget=forms.SelectDateWidget(months=MONTHS),
         label="Data planowanej realizacji",
-        initial="%s-%s-%s" % NativeServiceMethods._date_today(),
+        initial="%s-%s-%s" % NSMethods.date_today(),
     )
     price = forms.IntegerField(label="Cena [zł]")
     comments = forms.CharField(label="Uwagi do wyceny", widget=forms.Textarea)

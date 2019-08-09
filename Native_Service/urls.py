@@ -35,12 +35,12 @@ urlpatterns = [
     ),
     path(
         "price_for_you/<slug:slug>/",
-        views.PriceForCustomer2.as_view(),
+        views.PriceForCustomer.as_view(),
         name="price_for_you",
     ),
     path(
         "price_accepted/<slug:slug>/",
-        views.PriceAcceptedDotpay.as_view(),
+        views.PriceAcceptedPayU.as_view(),
         name="price_accepted",
     ),
     path(
@@ -48,7 +48,7 @@ urlpatterns = [
         views.SuccessfulPayment.as_view(),
         name="successful_payment",
     ),
-    path("notify/<slug:slug>/", views.notify, name="notifyt"),
+    path("notify/", views.notify, name="notifyt"),
     path(
         "in_progress/<slug:slug>/",
         views.OrderInProgress.as_view(),
