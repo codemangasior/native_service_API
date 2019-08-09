@@ -96,6 +96,13 @@ class ProgressStages:
         post.stage = STAGES.REJECTED
         post.save()
 
+    @staticmethod
+    def payment_rejected(data=None, secret_key=None):
+        # todo email for rejected payment
+        post = NativePost.objects.get(secret_key=secret_key)
+        post.stage = STAGES.REJECTED
+        post.save()
+
 
 class UrlsGenerator:
     """ The class contains all methods generating URL's"""

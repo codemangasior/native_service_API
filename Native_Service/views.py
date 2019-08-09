@@ -1,5 +1,6 @@
 import json
 import datetime
+import time
 from urllib import parse
 from urllib import request
 
@@ -396,18 +397,32 @@ class SuccessfulPayment(TemplateView):
             # Method gets all data from nativepost models with secret_key
             data_dict = NSMethods.get_nativepost_data(secret_key)
 
-            # Creates url for performer to set stage on 'in_progress'
-            url = UrlsGenerator.view_order_in_progress(secret_key)
+            # Get's notify url and pass to data_dict
+            notify_url = UrlsGenerator.view_notify(secret_key)
+            data_dict["notify_url"] = notify_url
 
-            # Setting stage on PAYMENT_DONE
-            if data_dict["stage"] == STAGES.ACCEPTED:
-                ProgressStages().payment_done(
-                    data=data_dict, secret_key=secret_key, url=url
-                )
+            # Get's successful payment url and pass to data_dict
+            successful_url = UrlsGenerator.view_successful_payment(secret_key)
+            data_dict["successful_url"] = successful_url
 
-            # todo check payment status with 'if' statements and handle cookies
-            self.request.session.delete_test_cookie()
-            self.request.session.set_test_cookie()
+            # Getting token
+            token = payu.get_token()
+            data_dict.update(token)
+
+            # CREATING ORDER
+            order_url = payu.order_request(data_dict, token)
+            data_dict["order_url"] = order_url
+
+            while data_dict["stage"] != STAGES.PAYMENT_DONE:
+                time.sleep(3)
+                if data_dict["stage"] == STAGES.REJECTED:
+                    break
+
+            if data_dict["stage"] == STAGES.PAYMENT_DONE:
+                self.request.session.delete_test_cookie()
+
+            # todo needs to delete cookies when payment reject
+
             return self.render_to_response(data_dict)
         else:
             raise PermissionError("Cookies Error.")
@@ -605,11 +620,36 @@ class PerformerLoginView(LoginView):
 def notify(request):
     """ Endpoint for PayU to sent information to NativeService. """
     if request.method == "POST":
+        # handling response and changing into python data dict
         string_response = request.body.decode("utf-8")
         jsondec = json.decoder.JSONDecoder()
         dictionary_response = jsondec.decode(string_response)
         print(dictionary_response)
-        return HttpResponse("POST")
+
+        secret_key = dictionary_response["order"]["description"]
+
+        # Method gets all data from nativepost models with secret_key
+        data_dict = NSMethods.get_nativepost_data(secret_key)
+
+        # Creates url for performer to set stage on 'in_progress'
+        url = UrlsGenerator.view_order_in_progress(secret_key)
+
+        if dictionary_response["order"]["status"] == "PENDING":
+            print("pending")
+
+        if dictionary_response["order"]["status"] == "COMPLETED":
+            print("completed")
+            # Setting stage on PAYMENT_DONE
+            if data_dict["stage"] == STAGES.ACCEPTED:
+                ProgressStages().payment_done(
+                    data=data_dict, secret_key=secret_key, url=url
+                )
+        if dictionary_response["order"]["status"] == "CANCELED":
+            print("canceled")
+            if data_dict["stage"] == STAGES.ACCEPTED:
+                ProgressStages().payment_rejected(data=data_dict, secret_key=secret_key)
+
+        return HttpResponse(dictionary_response)
     if request.method == "GET":
         print(request.body)
         return HttpResponse("GET")
