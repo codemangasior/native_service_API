@@ -1,4 +1,5 @@
 import datetime
+import time
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -54,16 +55,22 @@ class ProgressStages:
     @staticmethod
     def waiting_for_accept(data=None, url=None, secret_key=None):
         post = NativePost.objects.get(secret_key=secret_key)
-        post.stage = STAGES.WAITING_FOR_ACCEPT
-        post.save()
-        EmailGenerator().customer_price_to_accept_html(data, url)
+        if data['stage'] == STAGES.IN_QUEUE:
+            post.stage = STAGES.WAITING_FOR_ACCEPT
+            post.save()
+            EmailGenerator().customer_price_to_accept_html(data, url)
+        else:
+            raise PermissionError("The valuation is not in queue.")
 
     @staticmethod
     def accepted(data=None, secret_key=None):
         post = NativePost.objects.get(secret_key=secret_key)
-        post.stage = STAGES.ACCEPTED
-        post.save()
-        EmailGenerator().performer_order_accepted_html(data)
+        if data["stage"] == STAGES.WAITING_FOR_ACCEPT:
+            post.stage = STAGES.ACCEPTED
+            post.save()
+            EmailGenerator().performer_order_accepted_html(data)
+        else:
+            raise PermissionError("The valuation is not waiting for accept.")
 
     @staticmethod
     def payment_done(data=None, secret_key=None, url=None):
@@ -97,6 +104,19 @@ class ProgressStages:
         post.save()
 
     @staticmethod
+    def correct_payment(secret_key=None):
+        payment_done = False
+        while payment_done != True:
+            stage = NSMethods.get_nativepost_data(secret_key)["stage"]
+            if stage == STAGES.PAYMENT_DONE:
+                payment_done = True
+            else:
+                time.sleep(3)
+            if stage == STAGES.REJECTED:
+                break
+        return payment_done
+
+    @staticmethod
     def payment_rejected(data=None, secret_key=None):
         # todo email for rejected payment
         post = NativePost.objects.get(secret_key=secret_key)
@@ -110,53 +130,53 @@ class UrlsGenerator:
     @staticmethod
     def view_final_pricing(secret_key):
         """ Method generates url for performer to make some price. """
-        return f"{settings.HOST_URL}/final_pricing/{secret_key}/"
+        return f"{settings.HOST_URL}final_pricing/{secret_key}/"
 
     @staticmethod
     def view_price_for_customer(secret_key):
         """ Method generates url for customer to see price. """
-        return f"{settings.HOST_URL}/price_for_you/{secret_key}/"
+        return f"{settings.HOST_URL}price_for_you/{secret_key}/"
 
     @staticmethod
-    def view_price_accepted_dotpay(secret_key):
+    def view_price_accepted_payu(secret_key):
         """ Method generates url for customer for price accept. """
-        return f"{settings.HOST_URL}/price_accepted/{secret_key}/"
+        return f"{settings.HOST_URL}price_accepted/{secret_key}/"
 
     @staticmethod
     def view_file_list_view(secret_key):
         """ Method generates url for performer to see list of files. """
-        return f"{settings.HOST_URL}/file_list/{secret_key}/"
+        return f"{settings.HOST_URL}file_list/{secret_key}/"
 
     @staticmethod
     def view_notify(secret_key):
         """ Method generates url for PayU to sent request. """
-        return f"{settings.HOST_URL}/notify/"
+        return f"{settings.HOST_URL}notify/"
 
     @staticmethod
     def view_successful_payment(secret_key):
         """ Method generates url for performer to see successful_payment view. """
-        return f"{settings.HOST_URL}/successful_payment/{secret_key}/"
+        return f"{settings.HOST_URL}successful_payment/{secret_key}/"
 
     @staticmethod
     def view_order_in_progress(secret_key):
         """ Method generates url for performer to set stage on 'in_progress'. """
-        return f"{settings.HOST_URL}/in_progress/{secret_key}/"
+        return f"{settings.HOST_URL}in_progress/{secret_key}/"
 
     @staticmethod
     def view_reject_order(secret_key):
         """ Method generates url for performer to reject the order. """
-        return f"{settings.HOST_URL}/reject_order/{secret_key}/"
+        return f"{settings.HOST_URL}reject_order/{secret_key}/"
 
     @staticmethod
     def view_done(secret_key):
         """ Method generates url for performer to set stage on 'done'. """
-        return f"{settings.HOST_URL}/order_done/{secret_key}/"
+        return f"{settings.HOST_URL}order_done/{secret_key}/"
 
     @staticmethod
     def list_order_files_for_file_list_view(secret_key, coded_files_list, url_date):
         """ Method generates url for performer to take look at file list. """
         return [
-            f"{settings.HOST_URL}/media/uploads/{url_date}/{secret_key}/{f}"
+            f"{settings.HOST_URL}media/uploads/{url_date}/{secret_key}/{f}"
             for f in coded_files_list
         ]
 

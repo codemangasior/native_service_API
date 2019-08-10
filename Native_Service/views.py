@@ -276,10 +276,9 @@ class FinalPricingSubmit(LoginRequiredMixin, TemplateView):
             email_url = UrlsGenerator().view_price_for_customer(secret_key)
 
             # Setting stage on WAITING_FOR_ACCEPT
-            if data_dict["stage"] == STAGES.IN_QUEUE:
-                ProgressStages().waiting_for_accept(
-                    data=data_dict, url=email_url, secret_key=secret_key
-                )
+            ProgressStages().waiting_for_accept(
+                data=data_dict, url=email_url, secret_key=secret_key
+            )
 
             context = self.get_context_data(**kwargs)
             self.request.session.delete_test_cookie()
@@ -326,7 +325,7 @@ class PriceForCustomer(UpdateView):
         """Return the URL to redirect to after processing a valid form."""
         # Gets secret_key from session
         secret_key = self.request.session["secret_key"]
-        return UrlsGenerator.view_price_accepted_dotpay(secret_key)
+        return UrlsGenerator.view_price_accepted_payu(secret_key)
 
 
 class PriceAcceptedPayU(TemplateView):
@@ -336,7 +335,7 @@ class PriceAcceptedPayU(TemplateView):
 
     def get(self, *args, **kwargs):
         if self.request.session.test_cookie_worked():
-
+            self.request.session.set_test_cookie()
             # Gets secret_key from session
             secret_key = self.request.session["secret_key"]
 
@@ -405,24 +404,17 @@ class SuccessfulPayment(TemplateView):
             successful_url = UrlsGenerator.view_successful_payment(secret_key)
             data_dict["successful_url"] = successful_url
 
-            # Getting token
-            token = payu.get_token()
-            data_dict.update(token)
-
             # CREATING ORDER
-            order_url = payu.order_request(data_dict, token)
+            order_url = UrlsGenerator.view_price_accepted_payu(secret_key)
             data_dict["order_url"] = order_url
 
-            while data_dict["stage"] != STAGES.PAYMENT_DONE:
-                time.sleep(3)
-                if data_dict["stage"] == STAGES.REJECTED:
-                    break
+            # Passing secret_key by session to other methods
+            self.request.session["secret_key"] = secret_key
 
-            if data_dict["stage"] == STAGES.PAYMENT_DONE:
-                self.request.session.delete_test_cookie()
+            # Loop method checks payment status, returns True or False
+            ProgressStages.correct_payment(secret_key)
 
-            # todo needs to delete cookies when payment reject
-
+            self.request.session.delete_test_cookie()
             return self.render_to_response(data_dict)
         else:
             raise PermissionError("Cookies Error.")
@@ -615,7 +607,7 @@ class PerformerLoginView(LoginView):
 
 """ PayU Endpoint """
 
-
+# todo need to protect endpoint but with exceptions only
 @csrf_exempt
 def notify(request):
     """ Endpoint for PayU to sent information to NativeService. """
