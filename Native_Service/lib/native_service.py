@@ -55,7 +55,7 @@ class ProgressStages:
     @staticmethod
     def waiting_for_accept(data=None, url=None, secret_key=None):
         post = NativePost.objects.get(secret_key=secret_key)
-        if data['stage'] == STAGES.IN_QUEUE:
+        if data["stage"] == STAGES.IN_QUEUE:
             post.stage = STAGES.WAITING_FOR_ACCEPT
             post.save()
             EmailGenerator().customer_price_to_accept_html(data, url)

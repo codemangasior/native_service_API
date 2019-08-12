@@ -334,47 +334,43 @@ class PriceAcceptedPayU(TemplateView):
     template_name = "price_accepted_payu.html"
 
     def get(self, *args, **kwargs):
-        if self.request.session.test_cookie_worked():
-            self.request.session.set_test_cookie()
-            # Gets secret_key from session
-            secret_key = self.request.session["secret_key"]
+        self.request.session.set_test_cookie()
+        # Gets secret_key from session
+        secret_key = self.request.session["secret_key"]
 
-            # Method gets all data from nativepost models with secret_key
-            data_dict = NSMethods.get_nativepost_data(secret_key)
+        # Method gets all data from nativepost models with secret_key
+        data_dict = NSMethods.get_nativepost_data(secret_key)
 
-            # Gets 'secret_key' from url
-            path = self.request.path
-            url_secret_key = path.rsplit("/")[-2]
+        # Gets 'secret_key' from url
+        path = self.request.path
+        url_secret_key = path.rsplit("/")[-2]
 
-            # Get's notify url and pass to data_dict
-            notify_url = UrlsGenerator.view_notify(secret_key)
-            data_dict["notify_url"] = notify_url
+        # Get's notify url and pass to data_dict
+        notify_url = UrlsGenerator.view_notify(secret_key)
+        data_dict["notify_url"] = notify_url
 
-            # Get's successful payment url and pass to data_dict
-            successful_url = UrlsGenerator.view_successful_payment(secret_key)
-            data_dict["successful_url"] = successful_url
+        # Get's successful payment url and pass to data_dict
+        successful_url = UrlsGenerator.view_successful_payment(secret_key)
+        data_dict["successful_url"] = successful_url
 
-            # Setting stage on ACCEPTED
-            if data_dict["stage"] == STAGES.WAITING_FOR_ACCEPT:
-                ProgressStages().accepted(data=data_dict, secret_key=secret_key)
+        # Setting stage on ACCEPTED
+        if data_dict["stage"] == STAGES.WAITING_FOR_ACCEPT:
+            ProgressStages().accepted(data=data_dict, secret_key=secret_key)
 
-            """ PayU library """
+        """ PayU library """
 
-            # Getting token
-            token = payu.get_token()
-            data_dict.update(token)
+        # Getting token
+        token = payu.get_token()
 
-            # CREATING ORDER
-            order_url = payu.order_request(data_dict, token)
-            data_dict["order_url"] = order_url
+        # CREATING ORDER
+        order_url = payu.order_request(data_dict, token)
+        data_dict["order_url"] = order_url
 
-            # Secret_key authorization
-            if secret_key == url_secret_key:
-                return self.render_to_response(data_dict)
-            else:
-                raise ValueError(
-                    "SECRET_KEY does not exist, or you have problem with cookies."
-                )
+        # Secret_key authorization
+        if secret_key == url_secret_key:
+            return self.render_to_response(data_dict)
+        else:
+            raise ValueError("SECRET_KEY does not exist.")
 
 
 class SuccessfulPayment(TemplateView):
@@ -407,9 +403,6 @@ class SuccessfulPayment(TemplateView):
             # CREATING ORDER
             order_url = UrlsGenerator.view_price_accepted_payu(secret_key)
             data_dict["order_url"] = order_url
-
-            # Passing secret_key by session to other methods
-            self.request.session["secret_key"] = secret_key
 
             # Loop method checks payment status, returns True or False
             ProgressStages.correct_payment(secret_key)
@@ -612,6 +605,8 @@ class PerformerLoginView(LoginView):
 def notify(request):
     """ Endpoint for PayU to sent information to NativeService. """
     if request.method == "POST":
+        print(request.headers)
+
         # handling response and changing into python data dict
         string_response = request.body.decode("utf-8")
         jsondec = json.decoder.JSONDecoder()
@@ -641,7 +636,8 @@ def notify(request):
             if data_dict["stage"] == STAGES.ACCEPTED:
                 ProgressStages().payment_rejected(data=data_dict, secret_key=secret_key)
 
-        return HttpResponse(dictionary_response)
+        return HttpResponse(status=200)
     if request.method == "GET":
         print(request.body)
-        return HttpResponse("GET")
+        # status for production HttpResponseNotAllowed(['POST'])
+        return HttpResponse(status=200)
