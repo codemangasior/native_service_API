@@ -1,6 +1,5 @@
 import json
 import datetime
-import time
 from urllib import parse
 from urllib import request
 
@@ -331,6 +330,8 @@ class PriceForCustomer(UpdateView):
 class PriceAcceptedPayU(TemplateView):
     """ View for a customer to use PayU. """
 
+    ALLOWED_STAGES = [STAGES.WAITING_FOR_ACCEPT, STAGES.ACCEPTED, STAGES.REJECTED]
+
     template_name = "price_accepted_payu.html"
 
     def get(self, *args, **kwargs):
@@ -368,7 +369,12 @@ class PriceAcceptedPayU(TemplateView):
 
         # Secret_key authorization
         if secret_key == url_secret_key:
-            return self.render_to_response(data_dict)
+            if data_dict["stage"] in self.ALLOWED_STAGES:
+                return self.render_to_response(data_dict)
+            else:
+                raise PermissionError(
+                    "Something going wrong with your order. Contact our technical support department."
+                )
         else:
             raise ValueError("SECRET_KEY does not exist.")
 
@@ -431,8 +437,7 @@ class OrderInProgress(LoginRequiredMixin, TemplateView):
         url = UrlsGenerator.view_done(secret_key)
 
         # Setting stage on IN_PROGRESS
-        if data_dict["stage"] == STAGES.PAYMENT_DONE:
-            ProgressStages().in_progress(data=data_dict, secret_key=secret_key, url=url)
+        ProgressStages().in_progress(data=data_dict, secret_key=secret_key, url=url)
 
         if secret_key == data_dict["secret_key"]:
             return self.render_to_response(data_dict)
@@ -485,8 +490,7 @@ class RejectOrderSubmit(LoginRequiredMixin, TemplateView):
             data_dict = NSMethods.get_nativepost_data(secret_key)
 
             # Setting stage on REJECTED
-            if data_dict["stage"] != STAGES.REJECTED:
-                ProgressStages().order_rejected(data=data_dict, secret_key=secret_key)
+            ProgressStages().order_rejected(data=data_dict, secret_key=secret_key)
             self.request.session.delete_test_cookie()
             return self.render_to_response(context)
 
@@ -556,10 +560,9 @@ class OrderDone(LoginRequiredMixin, FormView):
         attachment = [f"{path}/{name}" for name in files_list]
 
         # Setting stage on DONE
-        if nativepost_data["stage"] != STAGES.DONE:
-            ProgressStages.done(
-                data=nativepost_data, secret_key=secret_key, attachment=attachment
-            )
+        ProgressStages.done(
+            data=nativepost_data, secret_key=secret_key, attachment=attachment
+        )
 
         self.request.session.set_test_cookie()
         return super().form_valid(form)
@@ -627,16 +630,15 @@ def notify(request):
         if dictionary_response["order"]["status"] == "COMPLETED":
             print("completed")
             # Setting stage on PAYMENT_DONE
-            if data_dict["stage"] == STAGES.ACCEPTED:
-                ProgressStages().payment_done(
-                    data=data_dict, secret_key=secret_key, url=url
-                )
+            ProgressStages().payment_done(
+                data=data_dict, secret_key=secret_key, url=url
+            )
         if dictionary_response["order"]["status"] == "CANCELED":
             print("canceled")
-            if data_dict["stage"] == STAGES.ACCEPTED:
-                ProgressStages().payment_rejected(data=data_dict, secret_key=secret_key)
+            ProgressStages().payment_rejected(data=data_dict, secret_key=secret_key)
 
         return HttpResponse(status=200)
+
     if request.method == "GET":
         print(request.body)
         # status for production HttpResponseNotAllowed(['POST'])
