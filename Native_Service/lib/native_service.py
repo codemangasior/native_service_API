@@ -143,7 +143,7 @@ class ProgressStages:
             post.stage = STAGES.REJECTED
             post.save()
         else:
-            # todo when PayU returns 'canceled' previous operation after successful current transfer, system raise error
+            # todo when PayU returns previous operation 'canceled' after successful current transfer, system raise error
             PermissionError(
                 "The order stage is not 'ACCEPTED' or 'REJECTED' at the moment."
             )

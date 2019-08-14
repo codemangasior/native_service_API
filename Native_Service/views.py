@@ -624,18 +624,8 @@ def notify(request):
         # Creates url for performer to set stage on 'in_progress'
         url = UrlsGenerator.view_order_in_progress(secret_key)
 
-        if dictionary_response["order"]["status"] == "PENDING":
-            print("pending")
-
-        if dictionary_response["order"]["status"] == "COMPLETED":
-            print("completed")
-            # Setting stage on PAYMENT_DONE
-            ProgressStages().payment_done(
-                data=data_dict, secret_key=secret_key, url=url
-            )
-        if dictionary_response["order"]["status"] == "CANCELED":
-            print("canceled")
-            ProgressStages().payment_rejected(data=data_dict, secret_key=secret_key)
+        # Function handles PayU response with current payment status.
+        payu.handle_response(dictionary_response, data_dict, secret_key, url)
 
         return HttpResponse(status=200)
 
