@@ -103,53 +103,53 @@ class UrlsGenerator:
     @staticmethod
     def view_final_pricing(secret_key):
         """ Method generates url for performer to make some price. """
-        return f"{settings.HOST_URL}/final_pricing/{secret_key}/"
+        return f"{settings.HOST_URL}final_pricing/{secret_key}/"
 
     @staticmethod
     def view_price_for_customer(secret_key):
         """ Method generates url for customer to see price. """
-        return f"{settings.HOST_URL}/price_for_you/{secret_key}/"
+        return f"{settings.HOST_URL}price_for_you/{secret_key}/"
 
     @staticmethod
     def view_price_accepted_dotpay(secret_key):
         """ Method generates url for customer for price accept. """
-        return f"{settings.HOST_URL}/price_accepted/{secret_key}/"
+        return f"{settings.HOST_URL}price_accepted/{secret_key}/"
 
     @staticmethod
     def view_file_list_view(secret_key):
         """ Method generates url for performer to see list of files. """
-        return f"{settings.HOST_URL}/file_list/{secret_key}/"
+        return f"{settings.HOST_URL}file_list/{secret_key}/"
 
     @staticmethod
     def view_notify(secret_key):
         """ Method generates url for PayU to sent request. """
-        return f"{settings.HOST_URL}/notify/"
+        return f"{settings.HOST_URL}notify/"
 
     @staticmethod
     def view_successful_payment(secret_key):
         """ Method generates url for performer to see successful_payment view. """
-        return f"{settings.HOST_URL}/successful_payment/{secret_key}/"
+        return f"{settings.HOST_URL}successful_payment/{secret_key}/"
 
     @staticmethod
     def view_order_in_progress(secret_key):
         """ Method generates url for performer to set stage on 'in_progress'. """
-        return f"{settings.HOST_URL}/in_progress/{secret_key}/"
+        return f"{settings.HOST_URL}in_progress/{secret_key}/"
 
     @staticmethod
     def view_reject_order(secret_key):
         """ Method generates url for performer to reject the order. """
-        return f"{settings.HOST_URL}/reject_order/{secret_key}/"
+        return f"{settings.HOST_URL}reject_order/{secret_key}/"
 
     @staticmethod
     def view_done(secret_key):
         """ Method generates url for performer to set stage on 'done'. """
-        return f"{settings.HOST_URL}/order_done/{secret_key}/"
+        return f"{settings.HOST_URL}order_done/{secret_key}/"
 
     @staticmethod
     def list_order_files_for_file_list_view(secret_key, coded_files_list, url_date):
         """ Method generates url for performer to take look at file list. """
         return [
-            f"{settings.HOST_URL}/media/uploads/{url_date}/{secret_key}/{f}"
+            f"{settings.HOST_URL}media/uploads/{url_date}/{secret_key}/{f}"
             for f in coded_files_list
         ]
 
