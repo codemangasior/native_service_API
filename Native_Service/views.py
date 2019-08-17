@@ -1,6 +1,12 @@
+import json
+import datetime
+from urllib import parse
+from urllib import request
+
 from django.core.files.storage import FileSystemStorage
 from django.core.files.base import ContentFile
 from django.conf import settings
+from django.http import HttpResponse
 from django.views.generic import FormView
 from django.views.generic import TemplateView
 from django.views.generic import UpdateView
@@ -8,6 +14,8 @@ from django.urls import reverse_lazy
 from django.utils.crypto import get_random_string
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
+from django.views.decorators.csrf import csrf_exempt
+
 from .models import NativePost
 from .forms import PricingForm
 from .forms import FinalPricingForm
@@ -18,28 +26,17 @@ from .forms import TranslatingForm
 from .forms import RejectOrderForm
 from .forms import CustomAuthenticationForm
 from .forms import ProductForm
+from .forms import PriceForYouForm
 from Native_Service.lib.native_service import ProgressStages
 from Native_Service.lib.native_service import UrlsGenerator
-from Native_Service.lib.native_service import SecretKey
 from Native_Service.lib.native_service import STAGES
-import datetime
-import json
-import urllib
-from urllib import parse
-from urllib import request
-
-
-def _get_data_from_nativepost(secret_key):
-    """ Function returns all data from native post filtered with secret_key."""
-    data = NativePost.objects.filter(secret_key=secret_key)
-
-    data_dict = {}
-    for i in data.values():
-        data_dict.update(i)
-    return data_dict
+from Native_Service.lib.native_service import NSMethods
+from Native_Service.lib import payu
 
 
 class IndexCategorySelect(TemplateView):
+    """ NativeService API main view with a category select. """
+
     template_name = "index.html"
 
 
@@ -56,7 +53,7 @@ class Pricing(FormView):
 
     def get(self, *args, **kwargs):
         """ Method generates secret_key in every request. """
-        secret_key = SecretKey().create()
+        secret_key = NSMethods.create_secret_key()
 
         # Passing secret_key by session to other methods
         self.request.session["secret_key"] = secret_key
@@ -88,7 +85,7 @@ class Pricing(FormView):
         }
         data = parse.urlencode(values).encode()
         req = request.Request(url, data=data)
-        response = urllib.request.urlopen(req)
+        response = request.urlopen(req)
         result = json.loads(response.read().decode())
 
         if result["success"]:
@@ -165,8 +162,8 @@ class SubmitPricing(TemplateView):
             # Gets coded_files_data from session
             coded_files_data = self.request.session["coded_files_list"]
 
-            # Function gets all data from nativepost models with secret_key
-            data_dict = _get_data_from_nativepost(secret_key)
+            # Method gets all data from nativepost models with secret_key
+            data_dict = NSMethods.get_nativepost_data(secret_key)
 
             # coded_files_list >>> coding as JSON and saves in NativePost(current order) database
             json_coded = json.dumps(coded_files_data)
@@ -190,8 +187,8 @@ class FileListView(LoginRequiredMixin, TemplateView):
         path = self.request.path
         secret_key = path.rsplit("/")[-2]
 
-        # Function gets all data from nativepost models with secret_key
-        context = _get_data_from_nativepost(secret_key)
+        # Method gets all data from nativepost models with secret_key
+        context = NSMethods.get_nativepost_data(secret_key)
         url_date = context["url_date"]
 
         # Decoding JSON file to python list back
@@ -205,7 +202,7 @@ class FileListView(LoginRequiredMixin, TemplateView):
         context["performer_urls_list"] = performer_urls_list
 
         # Render only if secret key exists in db
-        if secret_key == _get_data_from_nativepost(secret_key)["secret_key"]:
+        if secret_key == NSMethods.get_nativepost_data(secret_key)["secret_key"]:
             return context
         else:
             raise ValueError("SECRET_KEY does not exist.")
@@ -231,6 +228,9 @@ class FinalPricing(LoginRequiredMixin, UpdateView):
         path = self.request.path
         secret_key = path.rsplit("/")[-2]
 
+        # Method gets all data from nativepost models with secret_key
+        data_dict = NSMethods.get_nativepost_data(secret_key)
+
         # Creates FileListView url
         file_list_url = UrlsGenerator().view_file_list_view(secret_key)
 
@@ -240,13 +240,15 @@ class FinalPricing(LoginRequiredMixin, UpdateView):
         # Passing secret_key by session to other methods
         self.request.session["secret_key"] = secret_key
 
-        # Updates context
-        context.update(
+        # urls for view
+        data_dict.update(
             {"file_list_url": file_list_url, "reject_order_url": reject_order_url}
         )
+        # Updates context
+        context.update(data_dict)
 
         # Render only if secret key exists in db
-        if secret_key == _get_data_from_nativepost(secret_key)["secret_key"]:
+        if secret_key == NSMethods.get_nativepost_data(secret_key)["secret_key"]:
             return self.render_to_response(context)
         else:
             raise ValueError("SECRET_KEY does not exist.")
@@ -266,8 +268,8 @@ class FinalPricingSubmit(LoginRequiredMixin, TemplateView):
             # Gets secret_key from session
             secret_key = self.request.session["secret_key"]
 
-            # Function gets all data from nativepost models with secret_key
-            data_dict = _get_data_from_nativepost(secret_key)
+            # Method gets all data from nativepost models with secret_key
+            data_dict = NSMethods.get_nativepost_data(secret_key)
 
             # Creates url for customer to see price
             email_url = UrlsGenerator().view_price_for_customer(secret_key)
@@ -288,35 +290,48 @@ class FinalPricingSubmit(LoginRequiredMixin, TemplateView):
         return reverse_lazy("Native_Service:login")
 
 
-class PriceForCustomer(TemplateView):
-    """ View for a customer which gives the possibility to accept the price. """
+class PriceForCustomer(UpdateView):
+    """ View for a customer which gives the possibility to accept the price and terms. """
 
-    template_name = "price_for_you.html"
+    model = NativePost
+    template_name_suffix = "_price_for_you"
+    form_class = PriceForYouForm
 
     def get(self, *args, **kwargs):
         self.request.session.set_test_cookie()
+        self.object = self.get_object()
+        context = self.get_context_data(object=self.object)
 
         # Gets 'secret_key' from url
         path = self.request.path
         secret_key = path.rsplit("/")[-2]
 
-        # Passing secret key with session to next view
+        # Passing secret_key by session to other methods
         self.request.session["secret_key"] = secret_key
 
-        # Function gets all data from nativepost models with secret_key
-        data_dict = _get_data_from_nativepost(secret_key)
+        # Method gets all data from nativepost models with secret_key
+        data_dict = NSMethods.get_nativepost_data(secret_key)
 
-        # Creates url which gives possibility to accept price by customer
-        price_accept_url = UrlsGenerator().view_price_accepted_dotpay(secret_key)
-        data_dict.update({"accept_url": price_accept_url})
+        # Updates context
+        context.update(data_dict)
 
-        return self.render_to_response(data_dict)
+        # Render only if secret key exists in db
+        if secret_key == NSMethods.get_nativepost_data(secret_key)["secret_key"]:
+            return self.render_to_response(context)
+        else:
+            raise ValueError("SECRET_KEY does not exist.")
+
+    def get_success_url(self):
+        """Return the URL to redirect to after processing a valid form."""
+        # Gets secret_key from session
+        secret_key = self.request.session["secret_key"]
+        return UrlsGenerator.view_price_accepted_dotpay(secret_key)
 
 
-class PriceAcceptedDotpay(TemplateView):
-    """ View for a customer to use Dotpay. """
+class PriceAcceptedPayU(TemplateView):
+    """ View for a customer to use PayU. """
 
-    template_name = "price_accepted_dotpay.html"
+    template_name = "price_accepted_payu.html"
 
     def get(self, *args, **kwargs):
         if self.request.session.test_cookie_worked():
@@ -324,16 +339,34 @@ class PriceAcceptedDotpay(TemplateView):
             # Gets secret_key from session
             secret_key = self.request.session["secret_key"]
 
-            # Function gets all data from nativepost models with secret_key
-            data_dict = _get_data_from_nativepost(secret_key)
+            # Method gets all data from nativepost models with secret_key
+            data_dict = NSMethods.get_nativepost_data(secret_key)
 
             # Gets 'secret_key' from url
             path = self.request.path
             url_secret_key = path.rsplit("/")[-2]
 
+            # Get's notify url and pass to data_dict
+            notify_url = UrlsGenerator.view_notify(secret_key)
+            data_dict["notify_url"] = notify_url
+
+            # Get's successful payment url and pass to data_dict
+            successful_url = UrlsGenerator.view_successful_payment(secret_key)
+            data_dict["successful_url"] = successful_url
+
             # Setting stage on ACCEPTED
             if data_dict["stage"] == STAGES.WAITING_FOR_ACCEPT:
                 ProgressStages().accepted(data=data_dict, secret_key=secret_key)
+
+            """ PayU library """
+
+            # Getting token
+            token = payu.get_token()
+            data_dict.update(token)
+
+            # CREATING ORDER
+            order_url = payu.order_request(data_dict, token)
+            data_dict["order_url"] = order_url
 
             # Secret_key authorization
             if secret_key == url_secret_key:
@@ -344,19 +377,24 @@ class PriceAcceptedDotpay(TemplateView):
                 )
 
 
-class DotpayPaymentDone(TemplateView):
+class SuccessfulPayment(TemplateView):
     """ View for a customer after successful payment. """
 
-    template_name = "successful_payment_dotpay.html"
+    template_name = "successful_payment.html"
 
     def get(self, *args, **kwargs):
         if self.request.session.test_cookie_worked():
 
+            if self.request.GET.get("error") == "501":
+                self.template_name = "unsuccessful_payment.html"
+            else:
+                self.template_name = "successful_payment.html"
+
             # Gets secret_key from session
             secret_key = self.request.session["secret_key"]
 
-            # Function gets all data from nativepost models with secret_key
-            data_dict = _get_data_from_nativepost(secret_key)
+            # Method gets all data from nativepost models with secret_key
+            data_dict = NSMethods.get_nativepost_data(secret_key)
 
             # Creates url for performer to set stage on 'in_progress'
             url = UrlsGenerator.view_order_in_progress(secret_key)
@@ -367,7 +405,9 @@ class DotpayPaymentDone(TemplateView):
                     data=data_dict, secret_key=secret_key, url=url
                 )
 
+            # todo check payment status with 'if' statements and handle cookies
             self.request.session.delete_test_cookie()
+            self.request.session.set_test_cookie()
             return self.render_to_response(data_dict)
         else:
             raise PermissionError("Cookies Error.")
@@ -384,8 +424,8 @@ class OrderInProgress(LoginRequiredMixin, TemplateView):
         path = self.request.path
         secret_key = path.rsplit("/")[-2]
 
-        # Function gets all data from nativepost models with secret_key
-        data_dict = _get_data_from_nativepost(secret_key)
+        # Method gets all data from nativepost models with secret_key
+        data_dict = NSMethods.get_nativepost_data(secret_key)
 
         # Creates url for performer to set stage on 'done'
         url = UrlsGenerator.view_done(secret_key)
@@ -420,7 +460,7 @@ class RejectOrder(LoginRequiredMixin, UpdateView):
             # Gets secret_key from session
             secret_key = self.request.session["secret_key"]
 
-            if secret_key == _get_data_from_nativepost(secret_key)["secret_key"]:
+            if secret_key == NSMethods.get_nativepost_data(secret_key)["secret_key"]:
                 return self.render_to_response(context)
             else:
                 raise PermissionError("Cookies and Secret_Key Error.")
@@ -441,8 +481,8 @@ class RejectOrderSubmit(LoginRequiredMixin, TemplateView):
             # Gets secret_key from session
             secret_key = self.request.session["secret_key"]
 
-            # Function gets all data from nativepost models with secret_key
-            data_dict = _get_data_from_nativepost(secret_key)
+            # Method gets all data from nativepost models with secret_key
+            data_dict = NSMethods.get_nativepost_data(secret_key)
 
             # Setting stage on REJECTED
             if data_dict["stage"] != STAGES.REJECTED:
@@ -470,8 +510,8 @@ class OrderDone(LoginRequiredMixin, FormView):
         path = self.request.path
         secret_key = path.rsplit("/")[-2]
 
-        # Function gets all data from nativepost models with secret_key
-        nativepost_data = _get_data_from_nativepost(secret_key)
+        # Method gets all data from nativepost models with secret_key
+        nativepost_data = NSMethods.get_nativepost_data(secret_key)
 
         # Passing secret_key by session to other methods
         self.request.session["secret_key"] = secret_key
@@ -490,8 +530,8 @@ class OrderDone(LoginRequiredMixin, FormView):
         # Makes list of files
         files = self.request.FILES.getlist("attachments")
 
-        # Function gets all data from nativepost models with secret_key
-        nativepost_data = _get_data_from_nativepost(secret_key)
+        # Method gets all data from nativepost models with secret_key
+        nativepost_data = NSMethods.get_nativepost_data(secret_key)
 
         # Getting current order object to use as foreign_key
         current = NativePost.objects.get(secret_key=secret_key)
@@ -538,8 +578,8 @@ class OrderDoneSubmit(LoginRequiredMixin, TemplateView):
             # Gets secret_key from session
             secret_key = self.request.session["secret_key"]
 
-            # Function gets all data from nativepost models with secret_key
-            data_dict = _get_data_from_nativepost(secret_key)
+            # Method gets all data from nativepost models with secret_key
+            data_dict = NSMethods.get_nativepost_data(secret_key)
 
             self.request.session.delete_test_cookie()
             return self.render_to_response(data_dict)
@@ -556,3 +596,20 @@ class OrderDoneSubmit(LoginRequiredMixin, TemplateView):
 
 class PerformerLoginView(LoginView):
     authentication_form = CustomAuthenticationForm
+
+
+""" PayU Endpoint """
+
+
+@csrf_exempt
+def notify(request):
+    """ Endpoint for PayU to sent information to NativeService. """
+    if request.method == "POST":
+        string_response = request.body.decode("utf-8")
+        jsondec = json.decoder.JSONDecoder()
+        dictionary_response = jsondec.decode(string_response)
+        print(dictionary_response)
+        return HttpResponse("POST")
+    if request.method == "GET":
+        print(request.body)
+        return HttpResponse("GET")

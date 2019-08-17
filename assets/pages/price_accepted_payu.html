@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}NativeService API - Płatności{% endblock %}
+{% block content %}
+	{% load static %}
+	<div class="second bar">
+		<h1>
+			Przy pomocy PayU dokonaj płatności na umówioną kwotę.
+		</h1>
+		<p>
+			Zaraz po otrzymaniu wpłaty przystępujemy do realizacji zlecenia, bo czas to pieniądz.
+		</p>
+	</div>
+	<div class="body seventy">
+		<!-- container -->
+		<div class="stepbystep price">
+			<div class="box price">
+				<p>
+					{{ name }} klikając w przycisk poniżej NativeService przekieruje Cię do bezpiecznej strony płatności ONLINE
+					gdzie należy
+					zapłacić kwotę <strong>{{ price }} zł</strong> korzystając z najwygodniejszej dla Ciebie metody płatności.
+				</p>
+				<a href="{{ order_url }}"><img
+						src="http://static.payu.com/pl/standard/partners/buttons/payu_account_button_long_03.png" alt="PayU button"></a>
+			</div>
+		</div>
+	</div>
+
+{% endblock %}

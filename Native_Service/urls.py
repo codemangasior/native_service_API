@@ -4,6 +4,7 @@ from django.conf.urls import re_path
 from django.conf.urls.static import static
 from django.contrib.auth.decorators import login_required
 from django.views.static import serve
+
 from Native_Service import views
 
 
@@ -39,14 +40,15 @@ urlpatterns = [
     ),
     path(
         "price_accepted/<slug:slug>/",
-        views.PriceAcceptedDotpay.as_view(),
+        views.PriceAcceptedPayU.as_view(),
         name="price_accepted",
     ),
     path(
-        "payment_done/<slug:slug>/",
-        views.DotpayPaymentDone.as_view(),
-        name="dotpay_payment_done",
+        "successful_payment/<slug:slug>/",
+        views.SuccessfulPayment.as_view(),
+        name="successful_payment",
     ),
+    path("notify/", views.notify, name="notifyt"),
     path(
         "in_progress/<slug:slug>/",
         views.OrderInProgress.as_view(),

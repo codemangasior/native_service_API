@@ -1,9 +1,11 @@
+import datetime
+
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.crypto import get_random_string
+
 from Native_Service.models import NativePost
-import datetime
 
 
 class STAGES:
@@ -16,11 +18,29 @@ class STAGES:
     REJECTED = "ODRZUCONE"
 
 
-class SecretKey:
+class NSMethods:
+    """ NativeService necessary methods. """
+
     @staticmethod
-    def create():
+    def create_secret_key():
         """ Method generates secret keys. """
         return get_random_string(12)
+
+    @staticmethod
+    def get_nativepost_data(secret_key):
+        """ Function returns all data from native post filtered with secret_key."""
+        data = NativePost.objects.filter(secret_key=secret_key)
+
+        data_dict = {}
+        for i in data.values():
+            data_dict.update(i)
+        return data_dict
+
+    @staticmethod
+    def date_today():
+        """ Returns tuple with actual values: YEAR, MONTH, DAY"""
+        time = datetime.datetime.now()
+        return time.strftime("%Y"), time.strftime("%m"), time.strftime("%d")
 
 
 class ProgressStages:
@@ -99,6 +119,16 @@ class UrlsGenerator:
     def view_file_list_view(secret_key):
         """ Method generates url for performer to see list of files. """
         return f"{settings.HOST_URL}/file_list/{secret_key}/"
+
+    @staticmethod
+    def view_notify(secret_key):
+        """ Method generates url for PayU to sent request. """
+        return f"{settings.HOST_URL}/notify/"
+
+    @staticmethod
+    def view_successful_payment(secret_key):
+        """ Method generates url for performer to see successful_payment view. """
+        return f"{settings.HOST_URL}/successful_payment/{secret_key}/"
 
     @staticmethod
     def view_order_in_progress(secret_key):
