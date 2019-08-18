@@ -1,0 +1,6 @@
+pipenv
+black
+django
+django-widget-tweaks
+django-crispy-forms
+favicon

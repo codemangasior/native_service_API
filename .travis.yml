@@ -1,0 +1,12 @@
+language: python
+python:
+  - "3.7"
+
+install:
+  - echo "PIPENV BUILD ENV"
+  - pip install -r requirements.txt
+
+script:
+  - echo "TEST"
+  - black ./
+  - python ./CI_runner.py
