@@ -15,5 +15,5 @@ install:
 
 script:
   - echo "BLACK"
-  - black --check *.py
+  - black ./ *.py
   - pytest
