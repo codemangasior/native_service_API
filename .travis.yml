@@ -1,32 +1,11 @@
 language: python
 
-stages:
-  - build
-  - test
-
-build:
-    stage: build
-    variables:
-        PIPENV_VENV_IN_PROJECT: "true"
-
-    script:
-        - echo "PIPENV BUILD ENV"
-        - pip install pipenv
-        - pipenv sync --clear
-
-black:
-   stage: test
-   script:
-     - echo "BLACK"
-     - source .venv/bin/activate
-     - black --check *.py
-
-
-pytest:
-    stage: test
-    variables:
-        DJANGO_SETTINGS_MODULE: "native_service_API.settings"
-    script:
-        - echo "PYTEST"
-        - source .venv/bin/activate
-        - pytest
+install:
+  - echo "PIPENV BUILD ENV"
+  - pip install pipenv
+  - pipenv sync --clear
+script:
+  - echo "BLACK"
+  - source .venv/bin/activate
+  - black --check *.py
+  - pytest
