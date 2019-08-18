@@ -13,8 +13,9 @@ install:
   - pip install black
   - pip install django
   - whereis black
+  - black -h
 
 script:
   - echo "BLACK"
-  - black *.py ./
+  - black Native_Service/
   - pytest
