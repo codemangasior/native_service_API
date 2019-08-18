@@ -10,17 +10,8 @@ env:
 install:
   - echo "PIPENV BUILD ENV"
   - pip install -r requirements.txt
-  - pip install black
-  - pip install django
-  - pip install django-widget-tweaks
-  - pip install --upgrade django-crispy-forms
-  - pip install favicon
 
 script:
-  - echo "BLACK"
+  - echo "TEST"
   - black ./
-  - ls
-  - pwd
   - python ./CI_runner.py
-
-
