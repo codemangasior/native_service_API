@@ -10,6 +10,8 @@ install:
   - echo "PIPENV BUILD ENV"
   - pip install pipenv
   - pipenv sync --clear
+  - whereis black
+  - pipenv shell
   - pipenv run black
 script:
   - echo "BLACK"
