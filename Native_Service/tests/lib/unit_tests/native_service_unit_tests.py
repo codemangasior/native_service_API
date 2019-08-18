@@ -29,7 +29,6 @@ STAGE = [
 ]
 
 
-
 @pytest.fixture
 def test_native_service_url():
     return settings.HOST_URL
@@ -44,6 +43,7 @@ class FIXTURES:
     SECRET_KEY = test_secret_key
     DATETIME = datetime.datetime.now()
     DATE = datetime.date.today()
+
 
 @pytest.mark.django_db
 def nativepostmodel():
@@ -141,9 +141,9 @@ def test_url_view_done():
 
 
 def test_create_secret_key():
-    assert (native_service.NSMethods.create_secret_key().isprintable() == True)
-    assert (native_service.NSMethods.create_secret_key().isalnum() == True)
-    assert (native_service.NSMethods.create_secret_key().isascii() == True)
+    assert native_service.NSMethods.create_secret_key().isprintable() == True
+    assert native_service.NSMethods.create_secret_key().isalnum() == True
+    assert native_service.NSMethods.create_secret_key().isascii() == True
     for i in native_service.NSMethods.create_secret_key():
         assert i.isspace() == False
 
@@ -156,7 +156,10 @@ def test_get_nativepost_data():
 
 
 def test_date_today():
-    assert (native_service.NSMethods.date_today()[0] == str(FIXTURES.DATE.year))
-    assert (native_service.NSMethods.date_today()[1] == str('{:02d}'.format(FIXTURES.DATE.month)))
-    assert (native_service.NSMethods.date_today()[2] == str('{:02d}'.format(FIXTURES.DATE.day)))
-
+    assert native_service.NSMethods.date_today()[0] == str(FIXTURES.DATE.year)
+    assert native_service.NSMethods.date_today()[1] == str(
+        "{:02d}".format(FIXTURES.DATE.month)
+    )
+    assert native_service.NSMethods.date_today()[2] == str(
+        "{:02d}".format(FIXTURES.DATE.day)
+    )
