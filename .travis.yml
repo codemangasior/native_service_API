@@ -4,7 +4,7 @@ python:
 
 env:
   global:
-    - DJANGO_SETTINGS_MODULE = Native_Service.tests.lib.unit_tests.tests_settings.py
+    - DJANGO_SETTINGS_MODULE = Native_Service.tests.lib.unit_tests.test_settings.py
 
 
 install:
