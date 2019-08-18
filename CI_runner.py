@@ -2,7 +2,7 @@ import os
 import django
 import pytest
 
-os.environ["DJANGO_SETTINGS_MODULE"] = "native_service_API.test_settings.py"
+os.environ["DJANGO_SETTINGS_MODULE"] = "Native_Service.test_settings"
 
 
 if __name__ == "__main__":
