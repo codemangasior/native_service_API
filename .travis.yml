@@ -6,6 +6,5 @@ install:
   - pipenv sync --clear
 script:
   - echo "BLACK"
-  - source .venv/bin/activate
   - black --check *.py
   - pytest
