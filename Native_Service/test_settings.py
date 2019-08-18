@@ -11,15 +11,6 @@ SECRET_KEY = get_random_string(50)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "api.nativeservice.pl",
-    "www.api.nativeservice.pl",
-    "192.168.0.106",
-    "56b2f4e1.ngrok.io",
-]
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -35,27 +26,6 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "favicon",
 ]
-
-ROOT_URLCONF = "native_service_API.urls"
-
-TEMPLATES = [
-    {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "assets/pages")],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ]
-        },
-    }
-]
-
-WSGI_APPLICATION = "native_service_API.wsgi.application"
-
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
@@ -112,5 +82,3 @@ HOST_URL = LOCAL_HOST_URL
 # HOST_URL = "https://api.nativeservice.pl"
 
 SITE_ID = 1
-
-
