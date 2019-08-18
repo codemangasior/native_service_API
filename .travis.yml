@@ -1,5 +1,9 @@
 language: python
 
+env:
+  global:
+    - DJANGO_SETTINGS_MODULE = native_service_API.settings.py
+
 install:
   - echo "PIPENV BUILD ENV"
   - pip install pipenv
