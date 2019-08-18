@@ -8,6 +8,7 @@ install:
   - echo "PIPENV BUILD ENV"
   - pip install pipenv
   - pipenv sync --clear
+  - pipenv run black
 script:
   - echo "BLACK"
   - black --check *.py
