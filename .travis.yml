@@ -20,4 +20,6 @@ script:
   - black ./
   - ls
   - pwd
-  - pytest
+  - python -m pytest Native_Service/
+  - python ./CI_runner.py
+
