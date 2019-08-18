@@ -9,11 +9,10 @@ env:
 
 install:
   - echo "PIPENV BUILD ENV"
-  - 'pip install pipenv'
-  - 'pipenv install'
+  - pip install pipenv
+  - pip install black
   - whereis black
-  - pipenv whereis black
-  - pipenv run black
+
 script:
   - echo "BLACK"
   - black --check *.py
