@@ -2,5 +2,5 @@ pipenv
 black
 django
 django-widget-tweaks
---upgrade django-crispy-forms
+django-crispy-forms
 favicon
