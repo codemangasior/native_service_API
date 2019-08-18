@@ -13,7 +13,7 @@ install:
   - pip install black
   - pip install django
   - pip install django-widget-tweaks
-  - pip install crispy_forms
+  - pip install --upgrade django-crispy-forms
   - pip install favicon
 
 script:
