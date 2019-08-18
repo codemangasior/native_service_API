@@ -6,12 +6,13 @@ env:
   global:
     - DJANGO_SETTINGS_MODULE = native_service_API.settings.py
 
+
 install:
   - echo "PIPENV BUILD ENV"
-  - pip install pipenv
-  - pipenv sync --clear
+  - 'pip install pipenv'
+  - 'pipenv install'
   - whereis black
-  - pipenv shell
+  - pipenv whereis black
   - pipenv run black
 script:
   - echo "BLACK"
