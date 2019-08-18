@@ -20,4 +20,4 @@ script:
   - black ./
   - ls
   - pwd
-  - pytest Native_Service/
+  - python -m pytest Native_Service/
