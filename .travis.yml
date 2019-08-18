@@ -12,7 +12,7 @@ install:
   - pip install pipenv
   - pip install black
   - pip install django
-  - pip install widget_tweaks
+  - pip install django-widget-tweaks
   - pip install crispy_forms
   - pip install favicon
 
