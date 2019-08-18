@@ -11,9 +11,10 @@ install:
   - echo "PIPENV BUILD ENV"
   - pip install pipenv
   - pip install black
+  - pip install django
   - whereis black
 
 script:
   - echo "BLACK"
-  - black ./ *.py
+  - black *.py ./
   - pytest
