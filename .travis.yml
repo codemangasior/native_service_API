@@ -18,4 +18,4 @@ install:
 script:
   - echo "BLACK"
   - black ./
-  - pytest
+  - pytest Native_Service/
