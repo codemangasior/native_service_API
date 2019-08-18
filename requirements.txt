@@ -1,0 +1,6 @@
+pipenv
+black
+django
+django-widget-tweaks
+--upgrade django-crispy-forms
+favicon

@@ -9,7 +9,7 @@ env:
 
 install:
   - echo "PIPENV BUILD ENV"
-  - pip install pipenv
+  - pip install requirements.txt
   - pip install black
   - pip install django
   - pip install django-widget-tweaks
