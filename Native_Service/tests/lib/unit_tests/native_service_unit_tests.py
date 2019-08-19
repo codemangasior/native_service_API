@@ -90,7 +90,7 @@ def test_url_view_price_for_customer():
 
 def test_url_view_price_accepted_payu():
     assert (
-        native_service.UrlsGenerator.view_price_accepted_dotpay(FIXTURES.SECRET_KEY)
+        native_service.UrlsGenerator.view_price_accepted_payu(FIXTURES.SECRET_KEY)
         == f"{settings.HOST_URL}price_accepted/{FIXTURES.SECRET_KEY}/"
     )
 
