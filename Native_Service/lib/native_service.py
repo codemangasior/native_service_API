@@ -1,4 +1,5 @@
 import datetime
+import time
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -54,47 +55,98 @@ class ProgressStages:
     @staticmethod
     def waiting_for_accept(data=None, url=None, secret_key=None):
         post = NativePost.objects.get(secret_key=secret_key)
-        post.stage = STAGES.WAITING_FOR_ACCEPT
-        post.save()
-        EmailGenerator().customer_price_to_accept_html(data, url)
+        if data["stage"] == STAGES.IN_QUEUE:
+            post.stage = STAGES.WAITING_FOR_ACCEPT
+            post.save()
+            EmailGenerator().customer_price_to_accept_html(data, url)
+        else:
+            raise PermissionError("The valuation is not in queue.")
 
     @staticmethod
     def accepted(data=None, secret_key=None):
         post = NativePost.objects.get(secret_key=secret_key)
-        post.stage = STAGES.ACCEPTED
-        post.save()
-        EmailGenerator().performer_order_accepted_html(data)
+        if data["stage"] == STAGES.WAITING_FOR_ACCEPT:
+            post.stage = STAGES.ACCEPTED
+            post.save()
+            EmailGenerator().performer_order_accepted_html(data)
+        else:
+            raise PermissionError("The valuation is not waiting for accept.")
 
     @staticmethod
     def payment_done(data=None, secret_key=None, url=None):
+        ALLOWED_STAGES = [STAGES.ACCEPTED, STAGES.REJECTED]
         post = NativePost.objects.get(secret_key=secret_key)
-        post.stage = STAGES.PAYMENT_DONE
-        post.save()
-        EmailGenerator.customer_payment_done_html(data)
-        EmailGenerator.performer_payment_done_html(data, url)
+        if data["stage"] in ALLOWED_STAGES:
+            post.stage = STAGES.PAYMENT_DONE
+            post.save()
+            EmailGenerator.customer_payment_done_html(data)
+            EmailGenerator.performer_payment_done_html(data, url)
+
+        else:
+            raise PermissionError("The order stage is not 'ACCEPTED' at the moment.")
 
     @staticmethod
     def in_progress(data=None, secret_key=None, url=None):
         post = NativePost.objects.get(secret_key=secret_key)
-        post.stage = STAGES.IN_PROGRESS
-        post.save()
-        EmailGenerator.customer_order_in_progress_html(data)
-        EmailGenerator.performer_order_in_progress_html(data, url)
+        if data["stage"] == STAGES.PAYMENT_DONE:
+            post.stage = STAGES.IN_PROGRESS
+            post.save()
+            EmailGenerator.customer_order_in_progress_html(data)
+            EmailGenerator.performer_order_in_progress_html(data, url)
+        else:
+            raise PermissionError(
+                "The order stage is not 'PAYMENT_DONE' at the moment."
+            )
 
     @staticmethod
     def done(data=None, secret_key=None, attachment=None):
         # todo new field with end datetime
         post = NativePost.objects.get(secret_key=secret_key)
-        post.stage = STAGES.DONE
-        post.save()
-        EmailGenerator().customer_order_done_with_files(data, attachment)
+        if data["stage"] != STAGES.DONE:
+            post.stage = STAGES.DONE
+            post.save()
+            EmailGenerator().customer_order_done_with_files(data, attachment)
+        else:
+            raise PermissionError("The order stage is already 'DONE' at the moment.")
 
     @staticmethod
     def order_rejected(data=None, secret_key=None):
-        EmailGenerator.customer_order_rejected(data)
         post = NativePost.objects.get(secret_key=secret_key)
-        post.stage = STAGES.REJECTED
-        post.save()
+        if data["stage"] != STAGES.REJECTED:
+            post.stage = STAGES.REJECTED
+            post.save()
+            EmailGenerator.customer_order_rejected(data)
+        else:
+            raise PermissionError(
+                "The order stage is already 'REJECTED' at the moment."
+            )
+
+    @staticmethod
+    def correct_payment(secret_key=None):
+        payment_done = False
+        while payment_done != True:
+            stage = NSMethods.get_nativepost_data(secret_key)["stage"]
+            if stage == STAGES.PAYMENT_DONE:
+                payment_done = True
+            else:
+                time.sleep(2)
+            if stage == STAGES.REJECTED:
+                break
+        return payment_done
+
+    @staticmethod
+    def payment_rejected(data=None, secret_key=None):
+        # todo email for rejected payment
+        ALLOWED_STAGES = [STAGES.REJECTED, STAGES.ACCEPTED]
+        post = NativePost.objects.get(secret_key=secret_key)
+        if data["stage"] in ALLOWED_STAGES:
+            post.stage = STAGES.REJECTED
+            post.save()
+        else:
+            # todo when PayU returns previous operation 'canceled' after successful current transfer, system raise error
+            PermissionError(
+                "The order stage is not 'ACCEPTED' or 'REJECTED' at the moment."
+            )
 
 
 class UrlsGenerator:
@@ -111,7 +163,7 @@ class UrlsGenerator:
         return f"{settings.HOST_URL}price_for_you/{secret_key}/"
 
     @staticmethod
-    def view_price_accepted_dotpay(secret_key):
+    def view_price_accepted_payu(secret_key):
         """ Method generates url for customer for price accept. """
         return f"{settings.HOST_URL}price_accepted/{secret_key}/"
 

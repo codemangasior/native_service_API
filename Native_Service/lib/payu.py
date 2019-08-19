@@ -1,5 +1,8 @@
 import json
+
 from django.conf import settings
+
+from Native_Service.lib.native_service import ProgressStages
 import requests
 
 
@@ -66,3 +69,31 @@ def order_request(order_data, token_data):
     token_request = s.post(settings.PAYU_ORDER_ENDPOINT_URL, data=json_values)
 
     return token_request.url
+
+
+def handle_response(_response, data, secret_key, url):
+    """
+    Function handles PayU POST response to the 'notify' endpoint.
+
+    '_response' - is a python dictionary send to NativeService as a JSON,
+    'data' - is a 'nativepost' model order record filtered with secret_key,
+    'secret_key' - is a secret key of valuation and an order,
+    'url' - is an url for performer to set stage on 'in_progress'.
+
+    The Function returns one of the statuses current payment: PENDING, COMPLETED, CANCELED,
+    if something went wrong then returns: ERROR.
+    """
+    status = _response["order"]["status"]
+
+    if status == "PENDING":
+        stage = status
+    elif status == "COMPLETED":
+        stage = status
+        # Setting stage on PAYMENT_DONE
+        ProgressStages().payment_done(data=data, secret_key=secret_key, url=url)
+    elif status == "CANCELED":
+        stage = status
+        ProgressStages().payment_rejected(data=data, secret_key=secret_key)
+    else:
+        stage = "ERROR"
+    return print(stage)

@@ -275,10 +275,9 @@ class FinalPricingSubmit(LoginRequiredMixin, TemplateView):
             email_url = UrlsGenerator().view_price_for_customer(secret_key)
 
             # Setting stage on WAITING_FOR_ACCEPT
-            if data_dict["stage"] == STAGES.IN_QUEUE:
-                ProgressStages().waiting_for_accept(
-                    data=data_dict, url=email_url, secret_key=secret_key
-                )
+            ProgressStages().waiting_for_accept(
+                data=data_dict, url=email_url, secret_key=secret_key
+            )
 
             context = self.get_context_data(**kwargs)
             self.request.session.delete_test_cookie()
@@ -325,56 +324,59 @@ class PriceForCustomer(UpdateView):
         """Return the URL to redirect to after processing a valid form."""
         # Gets secret_key from session
         secret_key = self.request.session["secret_key"]
-        return UrlsGenerator.view_price_accepted_dotpay(secret_key)
+        return UrlsGenerator.view_price_accepted_payu(secret_key)
 
 
 class PriceAcceptedPayU(TemplateView):
     """ View for a customer to use PayU. """
 
+    ALLOWED_STAGES = [STAGES.WAITING_FOR_ACCEPT, STAGES.ACCEPTED, STAGES.REJECTED]
+
     template_name = "price_accepted_payu.html"
 
     def get(self, *args, **kwargs):
-        if self.request.session.test_cookie_worked():
+        self.request.session.set_test_cookie()
+        # Gets secret_key from session
+        secret_key = self.request.session["secret_key"]
 
-            # Gets secret_key from session
-            secret_key = self.request.session["secret_key"]
+        # Method gets all data from nativepost models with secret_key
+        data_dict = NSMethods.get_nativepost_data(secret_key)
 
-            # Method gets all data from nativepost models with secret_key
-            data_dict = NSMethods.get_nativepost_data(secret_key)
+        # Gets 'secret_key' from url
+        path = self.request.path
+        url_secret_key = path.rsplit("/")[-2]
 
-            # Gets 'secret_key' from url
-            path = self.request.path
-            url_secret_key = path.rsplit("/")[-2]
+        # Get's notify url and pass to data_dict
+        notify_url = UrlsGenerator.view_notify(secret_key)
+        data_dict["notify_url"] = notify_url
 
-            # Get's notify url and pass to data_dict
-            notify_url = UrlsGenerator.view_notify(secret_key)
-            data_dict["notify_url"] = notify_url
+        # Get's successful payment url and pass to data_dict
+        successful_url = UrlsGenerator.view_successful_payment(secret_key)
+        data_dict["successful_url"] = successful_url
 
-            # Get's successful payment url and pass to data_dict
-            successful_url = UrlsGenerator.view_successful_payment(secret_key)
-            data_dict["successful_url"] = successful_url
+        # Setting stage on ACCEPTED
+        if data_dict["stage"] == STAGES.WAITING_FOR_ACCEPT:
+            ProgressStages().accepted(data=data_dict, secret_key=secret_key)
 
-            # Setting stage on ACCEPTED
-            if data_dict["stage"] == STAGES.WAITING_FOR_ACCEPT:
-                ProgressStages().accepted(data=data_dict, secret_key=secret_key)
+        """ PayU library """
 
-            """ PayU library """
+        # Getting token
+        token = payu.get_token()
 
-            # Getting token
-            token = payu.get_token()
-            data_dict.update(token)
+        # CREATING ORDER
+        order_url = payu.order_request(data_dict, token)
+        data_dict["order_url"] = order_url
 
-            # CREATING ORDER
-            order_url = payu.order_request(data_dict, token)
-            data_dict["order_url"] = order_url
-
-            # Secret_key authorization
-            if secret_key == url_secret_key:
+        # Secret_key authorization
+        if secret_key == url_secret_key:
+            if data_dict["stage"] in self.ALLOWED_STAGES:
                 return self.render_to_response(data_dict)
             else:
-                raise ValueError(
-                    "SECRET_KEY does not exist, or you have problem with cookies."
+                raise PermissionError(
+                    "Something going wrong with your order. Contact our technical support department."
                 )
+        else:
+            raise ValueError("SECRET_KEY does not exist.")
 
 
 class SuccessfulPayment(TemplateView):
@@ -396,18 +398,22 @@ class SuccessfulPayment(TemplateView):
             # Method gets all data from nativepost models with secret_key
             data_dict = NSMethods.get_nativepost_data(secret_key)
 
-            # Creates url for performer to set stage on 'in_progress'
-            url = UrlsGenerator.view_order_in_progress(secret_key)
+            # Get's notify url and pass to data_dict
+            notify_url = UrlsGenerator.view_notify(secret_key)
+            data_dict["notify_url"] = notify_url
 
-            # Setting stage on PAYMENT_DONE
-            if data_dict["stage"] == STAGES.ACCEPTED:
-                ProgressStages().payment_done(
-                    data=data_dict, secret_key=secret_key, url=url
-                )
+            # Get's successful payment url and pass to data_dict
+            successful_url = UrlsGenerator.view_successful_payment(secret_key)
+            data_dict["successful_url"] = successful_url
 
-            # todo check payment status with 'if' statements and handle cookies
+            # CREATING ORDER
+            order_url = UrlsGenerator.view_price_accepted_payu(secret_key)
+            data_dict["order_url"] = order_url
+
+            # Loop method checks payment status, returns True or False
+            ProgressStages.correct_payment(secret_key)
+
             self.request.session.delete_test_cookie()
-            self.request.session.set_test_cookie()
             return self.render_to_response(data_dict)
         else:
             raise PermissionError("Cookies Error.")
@@ -431,8 +437,7 @@ class OrderInProgress(LoginRequiredMixin, TemplateView):
         url = UrlsGenerator.view_done(secret_key)
 
         # Setting stage on IN_PROGRESS
-        if data_dict["stage"] == STAGES.PAYMENT_DONE:
-            ProgressStages().in_progress(data=data_dict, secret_key=secret_key, url=url)
+        ProgressStages().in_progress(data=data_dict, secret_key=secret_key, url=url)
 
         if secret_key == data_dict["secret_key"]:
             return self.render_to_response(data_dict)
@@ -485,8 +490,7 @@ class RejectOrderSubmit(LoginRequiredMixin, TemplateView):
             data_dict = NSMethods.get_nativepost_data(secret_key)
 
             # Setting stage on REJECTED
-            if data_dict["stage"] != STAGES.REJECTED:
-                ProgressStages().order_rejected(data=data_dict, secret_key=secret_key)
+            ProgressStages().order_rejected(data=data_dict, secret_key=secret_key)
             self.request.session.delete_test_cookie()
             return self.render_to_response(context)
 
@@ -556,10 +560,9 @@ class OrderDone(LoginRequiredMixin, FormView):
         attachment = [f"{path}/{name}" for name in files_list]
 
         # Setting stage on DONE
-        if nativepost_data["stage"] != STAGES.DONE:
-            ProgressStages.done(
-                data=nativepost_data, secret_key=secret_key, attachment=attachment
-            )
+        ProgressStages.done(
+            data=nativepost_data, secret_key=secret_key, attachment=attachment
+        )
 
         self.request.session.set_test_cookie()
         return super().form_valid(form)
@@ -600,16 +603,33 @@ class PerformerLoginView(LoginView):
 
 """ PayU Endpoint """
 
-
+# todo need to protect endpoint but with exceptions only
 @csrf_exempt
 def notify(request):
     """ Endpoint for PayU to sent information to NativeService. """
     if request.method == "POST":
+        print(request.headers)
+
+        # handling response and changing into python data dict
         string_response = request.body.decode("utf-8")
         jsondec = json.decoder.JSONDecoder()
         dictionary_response = jsondec.decode(string_response)
         print(dictionary_response)
-        return HttpResponse("POST")
+
+        secret_key = dictionary_response["order"]["description"]
+
+        # Method gets all data from nativepost models with secret_key
+        data_dict = NSMethods.get_nativepost_data(secret_key)
+
+        # Creates url for performer to set stage on 'in_progress'
+        url = UrlsGenerator.view_order_in_progress(secret_key)
+
+        # Function handles PayU response with current payment status.
+        payu.handle_response(dictionary_response, data_dict, secret_key, url)
+
+        return HttpResponse(status=200)
+
     if request.method == "GET":
         print(request.body)
-        return HttpResponse("GET")
+        # status for production HttpResponseNotAllowed(['POST'])
+        return HttpResponse(status=200)
